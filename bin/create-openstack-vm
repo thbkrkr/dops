@@ -53,7 +53,7 @@ main() {
   done
 
   # Default values
-  name=${name:-$(random_word qualifier)-$(random_word name)}
+  name=${name:-$(random_word qualifiers)-$(random_word names)}
   flavor=${flavor:-vps-ssd-1}
   imageName=${imageName:-"Ubuntu 14.04"}
   netName=Ext-Net
