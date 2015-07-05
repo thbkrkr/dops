@@ -42,14 +42,14 @@ usage() {
 
 get_ip() {
   local machine_path=$1
-  local ip="no"
+  local ip="null"
 
   ip=$(jq -r .Driver.Ip $machine_path/config.json)
   
-  [ "$ip" == "no" ] \
+  [ "$ip" == "null" ] \
     && ip=$(jq -r .Driver.IPAddress $machine_path/config.json)
   
-  [ "$ip" == "no" ] \
+  [ "$ip" == "null" ] \
     && error dc 'Cannot read IP in $machine_path/config.json' \
     || echo "$ip"
 }
@@ -95,12 +95,12 @@ set_compose_opt() {
   if [ ! -z $file ]; then
     COMPOSE_OPT="$COMPOSE_OPT -f $COMPOSE_DIR/$file"
   else
-    FILE="docker-compose.yml"
+    file="docker-compose.yml"
     COMPOSE_OPT="$COMPOSE_OPT -f $COMPOSE_DIR/$file"
   fi
 
   [ ! -f $COMPOSE_DIR/$file ] \
-    && error dc "No file: $COMPOSE_DIR/$FILE" \
+    && error dc "No file: $COMPOSE_DIR/$file" \
     || return 0
 }
 
