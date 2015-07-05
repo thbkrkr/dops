@@ -123,7 +123,7 @@ Then:
 
 ### Encrypt and decrypt sensitive files
 
-See [crypt](bin/crypt)
+See [crypt](bin/crypt).
 
     > docker run --rm -ti -v $(pwd):/ops <org>/ops crypt encrypt
     > docker run --rm -ti -v $(pwd):/ops <org>/ops crypt decrypt
