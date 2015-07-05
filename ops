@@ -1,0 +1,115 @@
+#!/bin/bash
+set -euo pipefail
+
+NAME=${1:-USER}
+IMAGE="${NAME}/ops"
+
+usage() {
+cat <<-EOF
+  Usage: ./ops <command> [-m <machine>] [-n <name>] [-f <file>]
+
+  Run a Docker container with the $IMAGE Docker image.
+
+    <command>   create-openstack-vm     to create a VM
+                play                    to run Ansible
+                dc                      to run Docker Compose
+                dm                      to run Docker Machine
+                bash                    to go in the container
+
+  EXAMPLES: "
+  ======== "
+    ./ops create-openstack-vm
+    ./ops play -i ci -c "docker --version"
+    ./ops play -i ci -p boostrap
+    ./ops play -i ci -p install-newrelic
+    ./ops -m ae-ci -n ci dc ps
+EOF
+}
+
+calc_md5() {
+  find . \
+    '!' -path '*node_modules*' '!' -path '*bower*' '!' \
+    -path '*.md5sum' ! -path './.git/*' -type f \
+  | xargs md5sum | sort | md5sum | cut -d ' ' -f1 | cut -c-12
+}
+
+build() {
+  local md5=$1
+  local force=${2:-"no"}
+  local md5file=.$md5.md5sum
+  local image=$IMAGE:$md5
+
+  if [ ! -f $md5file ] || [ "$force" == "--force" ]; then
+    echo " --> Build $image..."
+    docker build --rm -t $image . #> /dev/null
+  fi
+
+  rm -f .*.md5sum && touch $md5file 
+}
+
+main() {
+  local md5=$(calc_md5)
+
+  # Print usage if no parameters
+  local p=${1:-""}
+  case $p in
+    "") usage && exit 2 ;;
+  esac
+
+  while getopts m:n:f:bdh arg 2>/dev/null
+  do
+    case $arg in
+      m) MACHINE=${OPTARG} ;;
+      n) NAME=${OPTARG} ;;
+      f) FILE=${OPTARG} ;;
+      b) build $md5 --force && exit $? ;;
+      d)
+        $RUN create-openstack-vm -h > doc/docker-machine.md
+        $RUN play -h > doc/ansible.md
+        $RUN dc -h > doc/docker-compose.md
+        ;;
+      h) usage && exit 0 ;;
+    esac
+  done
+  shift $((OPTIND-1))
+
+  DOCKER_OPT=""
+  set +u
+  if [ ! -z $MACHINE ]; then
+    DOCKER_OPT="-e MACHINE=$MACHINE"
+  elif [ ! -z $M ]; then
+    DOCKER_OPT="-e MACHINE=$M"
+  fi
+  if [ ! -z $NAME ]; then
+    DOCKER_OPT="$DOCKER_OPT -e NAME=$NAME"
+  elif [ ! -z $N ]; then
+    DOCKER_OPT="$DOCKER_OPT -e NAME=$N"
+  fi
+  [ ! -z $FILE ] && DOCKER_OPT="$DOCKER_OPT -e FILE=$FILE"
+  set -u
+
+  [ -t 0 ] && TTY="-ti" || TTY=""
+  VOLUME="-v $(pwd):/ops"
+
+  case $1 in
+    bash)
+      DOCKER_OPT="$DOCKER_OPT $VOLUME"
+      ;;
+    crypt)
+      DOCKER_OPT="$DOCKER_OPT $VOLUME"
+      ;;
+    create-openstack-vm)
+      DOCKER_OPT="$DOCKER_OPT $VOLUME"
+      ./ops crypt decrypt
+      ;;
+  esac
+
+  RUN="docker run --rm $TTY $DOCKER_OPT $IMAGE:$md5"
+
+  build $md5
+  
+  echo " --> $RUN $@..."
+  $RUN $@
+}
+
+main "$@"
