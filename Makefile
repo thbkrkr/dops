@@ -15,8 +15,10 @@ build-image:
 	@echo "Build $NAME:latest..."
 	docker build --rm -t $(NAME):latest .
 
-release: build
+tag:
 	docker tag -f $(NAME):latest $(NAME):$(VERSION)
+
+release: build tag
 
 push:
 	docker push $(NAME)
