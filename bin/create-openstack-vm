@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# Create VM with Docker Machine and the OpenStack driver.
+#
+set -euo pipefail
+
+source utils.sh
+
+CREDS_PATH=$WORKDIR/config/creds-openrc.sh
+
+usage() {
+cat <<-EOF
+  Usage: create-openstack-vm [-n <name>] [-f <flavour>] [-i <image>] [-y]
+
+  Create a VM with Docker Machine and the OpenStack driver.
+
+  A file $WORKDIR/config/creds-openrc.sh must exists with the OpenStack variables:
+    export OS_AUTH_URL=https://auth.cloud.ovh.net/v2.0
+    export OS_TENANT_ID=1234567890
+    export OS_TENANT_NAME="0987654321"
+    export OS_USERNAME="AzErTyUiO"
+    export OS_PASSWORD="QsDfGhJkLmMn"
+    export OS_REGION_NAME"ABC"
+
+  OPTIONS:
+  ========
+      -n <name>     Name of the VM        (default: random name)
+      -f <flavor>   Flavor                (default: ks-1)
+      -i <image>    OS Image              (default: Ubuntu 14.04)
+      -y            No prompt
+
+      -h            Print this help
+EOF
+}
+
+random_word() {
+  local dict=$1
+  shuf -n1  /usr/share/dict/$dict
+}
+
+main() {
+  local name= flavor= imageName= netName= sshUser= prompt=1
+
+  while getopts n:f:i:yh arg 2>/dev/null
+  do
+    case $arg in
+        n) name=$OPTARG ;;
+        f) flavor=$OPTARG ;;
+        i) imageName=$OPTARG ;;
+        y) prompt=0 ;;
+        ?|h) usage && exit 2 ;;
+    esac
+  done
+
+  # Default values
+  name=${name:-$(random_word qualifier)-$(random_word name)}
+  flavor=${flavor:-vps-ssd-1}
+  imageName=${imageName:-"Ubuntu 14.04"}
+  netName=Ext-Net
+  sshUser=admin
+  credsPath=${credsPath:-"$CREDS_PATH"}
+
+  [ ! -f $credsPath ] && error create-openstack-vm "$credsPath file not found"
+
+  # Source DOCKER_* variables to communicate with the remote Docker daemon
+  eval "$(cat $CREDS_PATH)"
+
+  echo '{"message":"create-openstack-vm","name":"'$name'","flavor":"'$flavor'","image":"'$imageName'"}'
+  
+  create_vm_cmd() {
+    echo docker-machine create -d openstack \
+      --openstack-flavor-name="$flavor" \
+      --openstack-image-name="$imageName" \
+      --openstack-net-name="$netName" \
+      --openstack-ssh-user="$sshUser" \
+      $name
+  }
+
+  if [ $prompt -eq 1 ]; then
+    create_vm_cmd
+    read -p "Press [Yy] to continue... " yn
+    case $yn in
+        [Yy]* ) $(create_vm_cmd) ;;
+        *     ) exit 0 ;;
+    esac
+  else
+    $(create_vm_cmd)
+  fi
+}
+
+main "$@" 

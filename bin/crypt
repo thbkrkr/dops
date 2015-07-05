@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# Encrypt and decrypt sensitive files with openssl.
+#
+set -euo pipefail
+
+source utils.sh
+
+usage() {
+cat <<-EOF
+  Usage: crypt <action>
+
+  Encrypt or decrypt sensitive files with OpenSSL.
+
+   <action>       encrypt             Encrypt all sensitives files
+                  decrypt             Decrypt all sensitives files
+                  clean-encrypt       Remove encrypted sensitives files
+                  rm-senstive-files   Remove sensitives files
+
+
+  OPTIONS:
+  ========
+      -h          Print this help
+EOF
+}
+
+list_sensitives_files() {
+  find $WORKDIR/machines $WORKDIR/config -type f \
+    -name "*.json" \
+    -o -name "*.pem" \
+    -o -name "*.pub" \
+    -o -name ".json" \
+    -o -name "id_rsa" \
+    -o -name "creds*.sh" 
+}
+
+list_encrypted_files() {
+  find $WORKDIR/machines $WORKDIR/config -type f \
+     -name "*.encrypted"
+}
+
+main() {
+  local param=${1:-help}
+  case $param in
+    e|encrypt)
+      for f in $(list_sensitives_files); do
+        local ef=$f.encrypted
+        encrypt $f $ef
+      done
+      echo "Machines files encrypted..."
+      ;;
+    d|decrypt)
+      for f in $(list_encrypted_files); do
+        local df=$(echo "$f" | sed "s/.encrypted//")
+        decrypt $f $df
+      done
+      echo "Machines files decrypted..."
+      ;;
+    c|clean-encrypt)
+      [ ! -f $WORKDIR/config/dockercfg.json ] \
+        && error crypt "raw files not present"
+      list_encrypted_files | xargs rm -f
+      ;;
+    r|rm-senstive-files)
+      [ ! -f $WORKDIR/config/dockercfg.json.encrypted ] \
+        && error crypt "encypted files not present"
+      list_sensitives_files | xargs rm -f
+      ;;
+    *)
+      usage && exit 2 ;;
+  esac
+
+  exit 0
+}
+
+main "$@"

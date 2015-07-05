@@ -1,0 +1,211 @@
+#!/bin/bash
+#
+# Small docker-compose wrapper that uses environment variables to setup the Docker daemon variables
+# and the docker-compose.yml to use.
+#
+set -euo pipefail
+
+source utils.sh
+
+COMPOSE_DIR=$WORKDIR/compose
+MACHINES_DIR=$WORKDIR/machines
+
+DEFAULT_CMD="up -d --x-smart-recreate"
+COMPOSE_OPT=""
+
+usage() {
+  echo ""
+  echo " Usage: dc <command>"
+  echo ""
+  echo "    <command>   Docker compose command (default: $DEFAULT_CMD). See dc -h."
+  echo ""
+  echo "  ENVIRONMENT VARIABLES: "
+  echo "  ====================== "
+  echo "    NAME     Name of the docker compose project and the YAML file if FILE is not set" 
+  echo "    FILE     Name of the docker compose YAML file"
+  echo "    MACHINE  Name of the machine (used to set DOCKER_TLS_VERIFY, DOCKER_HOST and"
+  echo "             DOCKER_CERT_PATH from the Docker Machine directory"
+  echo ""
+  echo "  EXAMPLES: "
+  echo "  ========= "
+  echo "    NAME=app dc <command>                   => docker-compose -p app -f app.yml"
+  echo "    FILE=stack.yml dc <command>             => docker-compose stack.yml"
+  echo "    NAME=app FILE=stack.yml dc <command>    => docker-compose -p app -f stack.yml"
+  echo ""
+  echo "  # Compose files:"
+  ls -1 $COMPOSE_DIR | sed -e "s/^/  -> /" -e "s/.yml//"
+  echo ""
+  echo "  # Machines:"
+  ls -1 $MACHINES_DIR | sed -e "s/^/  -> /"
+  echo ""
+}
+
+get_ip() {
+  local machine_path=$1
+  local ip="no"
+
+  ip=$(jq -r .Driver.Ip $machine_path/config.json)
+  
+  [ "$ip" == "no" ] \
+    && ip=$(jq -r .Driver.IPAddress $machine_path/config.json)
+  
+  [ "$ip" == "no" ] \
+    && error dc 'Cannot read IP in $machine_path/config.json' \
+    || echo "$ip"
+}
+
+set_machine() {
+  local machine=${MACHINE:-no}
+  local cert_path=${DOCKER_CERT_PATH:-no}
+
+  if [ "$machine" != "no" ]; then
+    # Read variables from machine files
+    local machine_path=$MACHINES_DIR/$machine
+  
+    [ ! -d $machine_path ] \
+      &&  error dc "No machine directory: $machine_path"
+
+    IP=$(get_ip $machine_path)
+    
+    export DOCKER_TLS_VERIFY="1"
+    export DOCKER_HOST="tcp://$IP:2376"
+    export DOCKER_CERT_PATH="$machine_path"
+
+  elif [ "$cert_path" != "no" ]; then
+    # Assumes env vars DOCKER_* are set
+    [ ! -d $DOCKER_CERT_PATH ] \
+      && error dc 'No cert directory: $DOCKER_CERT_PATH'
+    
+    MACHINE=$(echo $DOCKER_CERT_PATH | sed "s|.*/||")
+  else
+    error dc 'Neither variable $MACHINE or nor $DOCKER_CERT_PATH set'
+  fi
+}
+
+set_compose_opt() {
+  local name=${NAME:-""}
+  local file=${FILE:-""}
+
+  if [ ! -z $name ]; then
+    COMPOSE_OPT="-p $NAME"
+    # If FILE is not defined use NAME.yml
+    file=${FILE:-$NAME.yml}
+  fi
+
+  if [ ! -z $file ]; then
+    COMPOSE_OPT="$COMPOSE_OPT -f $COMPOSE_DIR/$file"
+  else
+    FILE="docker-compose.yml"
+    COMPOSE_OPT="$COMPOSE_OPT -f $COMPOSE_DIR/$file"
+  fi
+
+  [ ! -f $COMPOSE_DIR/$file ] \
+    && error dc "No file: $COMPOSE_DIR/$FILE" \
+    || return 0
+}
+
+set_notif() {
+  HIPCHAT_TOKEN=${HIPCHAT_TOKEN:-no}
+  HIPCHAT_ROOM=${HIPCHAT_ROOM:-ops}
+  SLACK_TOKEN=${SLACK_TOKEN:-no}
+  SLACK_ROOM=${SLACK_ROOM:-ops}
+}
+
+format_log() {
+  local file=$1
+  local log="$(cat $file | sed -e "s/\s*$//")"
+  [ ! -z "$log" ] \
+    && echo "<br>$log" \
+    || echo ""
+}
+
+notif() {
+  local status=$1
+  local action="$2"
+  local name="$3"
+
+  local title=""
+  local more=""
+  local color=""
+  local message=""
+
+  case $status in
+    0)
+      title="$action <b>SUCCESS</b>"
+      color="green"
+      bashColor="\e[0;32m"
+      more="$(format_log $output)"
+      ;;
+    *)
+      title="$action <b>FAILURE</b>"
+      color="red"
+      bashColor="\e[0;31m"
+      more="$(format_log $error)"
+      ;;
+  esac
+
+  message="$title - $name $more"
+
+  if [[ "$HIPCHAT_TOKEN" != "no" ]]; then
+    echo " @-> Send HipChat notification: $message to $HIPCHAT_ROOM"
+    curl -sk \
+      -H "Authorization: Bearer $HIPCHAT_TOKEN" \
+      -H "Content-type: application/json" \
+      "https://api.hipchat.com/v2/room/$HIPCHAT_ROOM/notification" -d '
+      {
+        "date": '$(date +%s)',
+        "color": "'$color'",
+        "message": "'"$message"'",
+        "notify": true
+      }'
+    case $status in
+      1) exit 1 ;;
+    esac
+  elif [[ "$SLACK_TOKEN" != "no" ]]; then
+    echo "TODO"
+  else
+    EOC="\e[0m"
+echo -e ' --> Notification:
+{'$bashColor'
+  "date": '$(date +%s)',
+  "color": "'$color'",
+  "message": "'"$message"'",
+  "notify": true
+'$EOC'}
+    '
+  fi
+}
+
+error="/tmp/error"
+output="/tmp/output"
+
+main() {
+
+  case "$@" in
+    -h|usage) usage && exit 2 ;;
+  esac
+  
+  set_machine
+  set_notif
+  
+  case "$@" in
+    bash) bash ;;
+    "")
+      set_compose_opt
+      cmd="$DEFAULT_CMD" ;;
+    *)
+      set_compose_opt
+      cmd="$@" ;;
+  esac
+  
+  echo " --> [machine=$MACHINE] docker-compose $COMPOSE_OPT $cmd"
+  set +e
+  docker-compose $COMPOSE_OPT $cmd 2> $error 2> $output
+  status_code=$?
+  set -e
+
+  NAME=${NAME:-"--"}
+  notif $status_code "compose" "name=$NAME machine=$MACHINE cmd=$cmd"
+}
+
+main "$@"

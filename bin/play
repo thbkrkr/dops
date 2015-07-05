@@ -1,0 +1,122 @@
+#!/bin/bash
+#
+# Ansible wrapper to execute playbooks and commands.
+#
+set -euo pipefail
+
+ANSIBLE_VERSION=1.9.2
+
+source utils.sh
+
+VAULT_PWD_FILE=$WORKDIR/config/.password
+INVENTORIES_DIR=$WORKDIR/ansible/inventories
+PLAYBOOKS_DIR=$WORKDIR/ansible/playbooks
+
+export ANSIBLE_NOCOWS=1
+export ANSIBLE_HOST_KEY_CHECKING=False
+
+usage() {
+  echo ""
+  echo " Usage: play -i <inventory> [-p <playbook>|-c <cmd>] [-o]"
+  echo ""
+  echo "  # Inventories:"
+  ls -1 $INVENTORIES_DIR | sed "s/^/  - /"
+  echo ""
+  echo "  # Playbooks:"
+  ls -1 $PLAYBOOKS_DIR | sed -e "s/^/  - /" -e "s/.yml//"
+  echo ""
+  echo " OPTIONS:"
+  echo " ========"
+  echo "    -o    Ansible options (ex: -l <host> -t <tag> -vvv ...)"
+  echo ""
+}
+
+check_ansible_version () {
+  if [ $(ansible --version | cut -d ' ' -f2) != $ANSIBLE_VERSION ]
+  then
+    error play "Ansible $ANSIBLE_VERSION required"
+  fi
+  return 0
+}
+
+play() {
+  local inventory=$1
+  local playbook=$2
+  local host=$3
+  echo "[info] Execute playbook: $playbook"
+  ansible-playbook -i $INVENTORIES_DIR/$inventory $PLAYBOOKS_DIR/${playbook}.yml \
+    --extra-vars="host=$host" $ansible_options
+}
+
+execmd() {
+  local inventory=$1
+  local cmd=$2
+  local host=$3
+  echo "[info] Execute command: $cmd"
+  ansible $host -i $INVENTORIES_DIR/$inventory -m command -a "bash -c '$cmd'" $ansible_options
+}
+
+decrypt() {
+  local file=$1
+  if [ $(grep -c ANSIBLE_VAULT $file) -eq 1 ]
+  then
+    ansible-vault decrypt --vault-password-file=$VAULT_PWD_FILE $file
+    chmod 600 $file
+  else
+    echo "WARN: $file is not a file encrypted with ansible-vault"
+    fi
+}
+
+main() {
+  local inventory="required" target="required" playbook cmd ansible_options=""
+
+  check_ansible_version
+
+  [ ! -f $VAULT_PWD_FILE ]  && echo "WARN: File $VAULT_PWD_FILE not found"
+  
+  while getopts i:p:c:o:h arg 2>/dev/null
+  do
+    case $arg in
+        i) inventory=${OPTARG} ;;
+        p) target=playbook
+           playbook=${OPTARG:-required} ;;
+        c) target=exec
+           cmd=${OPTARG:-required} ;;
+        o) ansible_options=$OPTARG ;;
+        ?|h) usage && exit 2 ;;
+    esac
+  done
+
+  # Valid parameters
+  [ "$inventory" == "required" ] && error "play" "-i <inventory> parameter required"
+
+  [ ! -f $INVENTORIES_DIR/$inventory ] && error play "File $INVENTORIES_DIR/$inventory not found"
+  echo "[info] inventory: $inventory"
+  
+  [ "$target" == "required" ] && error play "-p <playbook> or -c <cmd> parameter required"
+
+  find $WORKDIR -name "*id_rsa" | xargs chmod 600
+  # FIXME: option?
+  host=machines
+
+  case "$target" in
+    playbook)
+      [ ! -f $PLAYBOOKS_DIR/${playbook}.yml ] \
+        && error play "Playbook ${playbook}.yml not found"
+
+      # Decrypt all keys
+      # for file in $(ls keys)
+      # do
+      #   decrypt $KEYS_DIR/$file
+      # done
+
+      play $inventory $playbook $host
+      ;;
+    exec)
+      execmd $inventory "$cmd" $host
+      ;;
+    *) usage && exit 2 ;;
+  esac
+}
+
+main "$@"
