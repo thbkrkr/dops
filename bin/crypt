@@ -25,18 +25,20 @@ EOF
 }
 
 list_sensitives_files() {
-  find $WORKDIR/machines $WORKDIR/config -type f \
+  find $WORKDIR/ansible/keys $WORKDIR/machines $WORKDIR/config \
+    -type f \
     -name "*.json" \
     -o -name "*.pem" \
     -o -name "*.pub" \
     -o -name ".json" \
-    -o -name "id_rsa" \
+    -o -name "*id_rsa" \
     -o -name "creds*.sh" 
 }
 
 list_encrypted_files() {
-  find $WORKDIR/machines $WORKDIR/config -type f \
-     -name "*.encrypted"
+  find $WORKDIR/ansible/keys $WORKDIR/machines $WORKDIR/config \
+    -type f \
+    -name "*.encrypted"
 }
 
 main() {
