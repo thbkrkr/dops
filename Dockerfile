@@ -25,9 +25,13 @@ RUN apk --update \
   && pip install ansible==${ANSIBLE_VERSION}
 
 COPY build/docker-machine-${DOCKER_MACHINE_VERSION} /usr/local/bin/docker-machine
-RUN ln -s /usr/local/bin/docker-machine /usr/local/bin/dm
+RUN \
+  ln -s /usr/local/bin/docker-machine /usr/local/bin/dm && \
+  ln -s /usr/bin/docker-compose /usr/local/bin/dc
+
 COPY dict /usr/share/dict
 COPY bin /usr/local/bin
+COPY config /root
 
 WORKDIR /ops
-CMD ["dc"]
+ENTRYPOINT ["start"]
