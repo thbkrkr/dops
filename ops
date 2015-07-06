@@ -11,9 +11,10 @@ cat <<-EOF
   Run a Docker container with the $IMAGE Docker image.
 
     <command>   create-openstack-vm     to create a VM
-                play                    to run Ansible
-                dc                      to run Docker Compose
+                play                    to run the Ansible wrapper script
+                dcompose                 to run the Docker Compose wrapper script
                 dm                      to run Docker Machine
+                dc                      to run Docker Compose
                 bash                    to go in the container
 
   EXAMPLES: "
@@ -22,7 +23,7 @@ cat <<-EOF
     ./ops play -i ci -c "docker --version"
     ./ops play -i ci -p boostrap
     ./ops play -i ci -p install-newrelic
-    ./ops -m ae-ci -n ci dc ps
+    ./ops -m ae-ci -n ci dcompose ps
 EOF
 }
 
@@ -56,6 +57,7 @@ main() {
     "") usage && exit 2 ;;
   esac
 
+  # Accepts -m -n -f to set MACHINE/NAME/FILE env vars
   while getopts m:n:f:bdh arg 2>/dev/null
   do
     case $arg in
@@ -63,16 +65,12 @@ main() {
       n) NAME=${OPTARG} ;;
       f) FILE=${OPTARG} ;;
       b) build $md5 --force && exit $? ;;
-      d)
-        $RUN create-openstack-vm -h > doc/docker-machine.md
-        $RUN play -h > doc/ansible.md
-        $RUN dc -h > doc/docker-compose.md
-        ;;
       h) usage && exit 0 ;;
     esac
   done
   shift $((OPTIND-1))
 
+  # Transforms [MACHINE|M|NAME|M] env vars in '-e <NAME>=<VALUE>'
   DOCKER_OPT=""
   set +u
   if [ ! -z $MACHINE ]; then
@@ -88,19 +86,14 @@ main() {
   [ ! -z $FILE ] && DOCKER_OPT="$DOCKER_OPT -e FILE=$FILE"
   set -u
 
+  # Detect TTY
   [ -t 0 ] && TTY="-ti" || TTY=""
-  VOLUME="-v $(pwd):/ops"
 
+  # Mount volume depending the command
+  VOLUME="-v $(pwd):/ops"
   case $1 in
-    bash)
+    bash|crypt|create-openstack-vm)
       DOCKER_OPT="$DOCKER_OPT $VOLUME"
-      ;;
-    crypt)
-      DOCKER_OPT="$DOCKER_OPT $VOLUME"
-      ;;
-    create-openstack-vm)
-      DOCKER_OPT="$DOCKER_OPT $VOLUME"
-      ./ops crypt decrypt
       ;;
   esac
 

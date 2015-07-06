@@ -8,16 +8,15 @@ set -euo pipefail
 source utils.sh
 
 COMPOSE_DIR=$WORKDIR/compose
-MACHINES_DIR=$WORKDIR/machines
 
 DEFAULT_CMD="up -d --x-smart-recreate"
 COMPOSE_OPT=""
 
 usage() {
   echo ""
-  echo " Usage: dc <command>"
+  echo " Usage: compose <command>"
   echo ""
-  echo "    <command>   Docker compose command (default: $DEFAULT_CMD). See dc -h."
+  echo "    <command>   Docker compose command (default: $DEFAULT_CMD). See compose -h."
   echo ""
   echo "  ENVIRONMENT VARIABLES: "
   echo "  ====================== "
@@ -28,9 +27,9 @@ usage() {
   echo ""
   echo "  EXAMPLES: "
   echo "  ========= "
-  echo "    NAME=app dc <command>                   => docker-compose -p app -f app.yml"
-  echo "    FILE=stack.yml dc <command>             => docker-compose stack.yml"
-  echo "    NAME=app FILE=stack.yml dc <command>    => docker-compose -p app -f stack.yml"
+  echo "    NAME=app compose <command>                   => docker-compose -p app -f app.yml"
+  echo "    FILE=stack.yml compose <command>             => docker-compose stack.yml"
+  echo "    NAME=app FILE=stack.yml compose <command>    => docker-compose -p app -f stack.yml"
   echo ""
   echo "  # Compose files:"
   ls -1 $COMPOSE_DIR | sed -e "s/^/  -> /" -e "s/.yml//"
@@ -38,48 +37,6 @@ usage() {
   echo "  # Machines:"
   ls -1 $MACHINES_DIR | sed -e "s/^/  -> /"
   echo ""
-}
-
-get_ip() {
-  local machine_path=$1
-  local ip="null"
-
-  ip=$(jq -r .Driver.Ip $machine_path/config.json)
-  
-  [ "$ip" == "null" ] \
-    && ip=$(jq -r .Driver.IPAddress $machine_path/config.json)
-  
-  [ "$ip" == "null" ] \
-    && error dc 'Cannot read IP in $machine_path/config.json' \
-    || echo "$ip"
-}
-
-set_machine() {
-  local machine=${MACHINE:-no}
-  local cert_path=${DOCKER_CERT_PATH:-no}
-
-  if [ "$machine" != "no" ]; then
-    # Read variables from machine files
-    local machine_path=$MACHINES_DIR/$machine
-  
-    [ ! -d $machine_path ] \
-      &&  error dc "No machine directory: $machine_path"
-
-    IP=$(get_ip $machine_path)
-    
-    export DOCKER_TLS_VERIFY="1"
-    export DOCKER_HOST="tcp://$IP:2376"
-    export DOCKER_CERT_PATH="$machine_path"
-
-  elif [ "$cert_path" != "no" ]; then
-    # Assumes env vars DOCKER_* are set
-    [ ! -d $DOCKER_CERT_PATH ] \
-      && error dc 'No cert directory: $DOCKER_CERT_PATH'
-    
-    MACHINE=$(echo $DOCKER_CERT_PATH | sed "s|.*/||")
-  else
-    error dc 'Neither variable $MACHINE or nor $DOCKER_CERT_PATH set'
-  fi
 }
 
 set_compose_opt() {
@@ -100,7 +57,7 @@ set_compose_opt() {
   fi
 
   [ ! -f $COMPOSE_DIR/$file ] \
-    && error dc "No file: $COMPOSE_DIR/$file" \
+    && error compose "No file: $COMPOSE_DIR/$file" \
     || return 0
 }
 
@@ -187,6 +144,9 @@ main() {
   
   set_machine
   set_notif
+  
+  [ -z $MACHINE ] \
+    && error compose 'Neither variable $MACHINE or nor $DOCKER_CERT_PATH set'
   
   case "$@" in
     bash) bash ;;
