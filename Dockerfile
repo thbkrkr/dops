@@ -26,6 +26,7 @@ RUN apk --update \
 
 COPY build/docker-machine-${DOCKER_MACHINE_VERSION} /usr/local/bin/docker-machine
 RUN \
+  mkdir -p /root/.docker/machine && \
   ln -s /usr/local/bin/docker-machine /usr/local/bin/dm && \
   ln -s /usr/bin/docker-compose /usr/local/bin/dc
 
