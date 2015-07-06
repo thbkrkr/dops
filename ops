@@ -12,7 +12,7 @@ cat <<-EOF
 
     <command>   create-openstack-vm     to create a VM
                 play                    to run the Ansible wrapper script
-                dcompose                 to run the Docker Compose wrapper script
+                dcompose                to run the Docker Compose wrapper script
                 dm                      to run Docker Machine
                 dc                      to run Docker Compose
                 bash                    to go in the container

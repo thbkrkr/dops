@@ -10,7 +10,7 @@ It contains some [scripts](bin) to ease the use of this tools.
 
 ### Directories conventions
 
-If you want use the tools scripts, each one expects some directories.
+If you want use the tools scripts, each one expects some directories ([example](docs/tree.md)).
 
 ##### [`play`](bin/play) (Ansible wrapper):
 
@@ -48,69 +48,15 @@ Docker Machine:
 
   - /ops/machines/
 
-Example:
-
-    ├── ansible
-    │   ├── inventories
-    │   │   ├── ci
-    │   │   ├── integ
-    │   │   └── prod
-    │   ├── keys
-    │   │   └── user.id_rsa
-    │   ├── play
-    │   └── playbooks
-    │       ├── bootstrap.yml
-    │       ├── install-xyz.yml
-    │       ├── ...
-    │       └── roles
-    │           └── ...
-    ├── compose
-    │   ├── app1.yml
-    │   ├── backup
-    │   │   ├── save.yml
-    │   │   └── restore.yml
-    │   ├── ci.yml
-    │   ├── ...
-    │   └── logging.yml
-    ├── config
-    │   ├── creds-openrc.sh.encrypted
-    │   └── dockercfg.json.encrypted
-    ├── images
-    │   ├── app
-    │   │   └── app1
-    │   │       ├── Dockerfile
-    │   │       └── files
-    │   │           └── ...
-    │   ├── core
-    │   │   ├── nodejs
-    │   │   │   └── Dockerfile
-    │   │   └── nginx
-    │   │       └── Dockerfile
-    │   └── ...
-    ├── machines
-    │   ├── m1
-    │   │   ├── ca.pem.encrypted
-    │   │   ├── cert.pem.encrypted
-    │   │   ├── config.json.encrypted
-    │   │   ├── id_rsa.encrypted
-    │   │   ├── id_rsa.pub.encrypted
-    │   │   ├── key.pem.encrypted
-    │   │   ├── server-key.pem.encrypted
-    │   │   └── server.pem.encrypted
-    │   ├── ...
-    │   └── ...
-    └── Dockerfile
-
 ### Build
 
-    FROM krkr/ops:0.1
+    FROM krkr/ops:0.2
 
     COPY . /ops
 
     # Decrypt sensitive files and link .dockercfg file and machines/ dir config.
     RUN crypt decrypt \
       && ln -s /ops/config/dockercfg /root/.dockercfg \
-      && mkdir -p /root/.docker/machine \
       && ln -s /ops/machines /root/.docker/machine/machines
 
 Then:
