@@ -67,8 +67,16 @@ main() {
 
   echo '{"message":"create-openstack-vm","name":"'$name'","flavor":"'$flavor'","image":"'$imageName'"}'
   
-  create_vm_cmd() {
+  echo_create_vm_cmd() {
     echo docker-machine create -d openstack \
+      --openstack-flavor-name="$flavor" \
+      --openstack-image-name="\"$imageName\"" \
+      --openstack-net-name="$netName" \
+      --openstack-ssh-user="$sshUser" \
+      $name
+  }
+  create_vm_cmd() {
+    docker-machine create -d openstack \
       --openstack-flavor-name="$flavor" \
       --openstack-image-name="$imageName" \
       --openstack-net-name="$netName" \
@@ -77,14 +85,14 @@ main() {
   }
 
   if [ $prompt -eq 1 ]; then
-    create_vm_cmd
+    echo_create_vm_cmd
     read -p "Press [Yy] to continue... " yn
     case $yn in
-        [Yy]* ) $(create_vm_cmd) ;;
+        [Yy]* ) create_vm_cmd ;;
         *     ) exit 0 ;;
     esac
   else
-    $(create_vm_cmd)
+    create_vm_cmd
   fi
 }
 
