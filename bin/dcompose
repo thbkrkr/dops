@@ -9,7 +9,7 @@ source utils.sh
 
 COMPOSE_DIR=$WORKDIR/compose
 
-DEFAULT_CMD="up -d --x-smart-recreate"
+DEFAULT_CMD="up -d --x-smart-recreate --allow-insecure-ssl"
 COMPOSE_OPT=""
 
 usage() {
@@ -160,7 +160,7 @@ main() {
   
   echo " --> [machine=$MACHINE] docker-compose $COMPOSE_OPT $cmd"
   set +e
-  docker-compose $COMPOSE_OPT $cmd 2> $error 2> $output
+  docker-compose $COMPOSE_OPT $cmd #2> $error 2> $output
   status_code=$?
   set -e
 
