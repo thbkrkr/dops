@@ -50,7 +50,7 @@ Docker Machine:
 
 ### Build
 
-    FROM krkr/ops:0.2
+    FROM krkr/ops:0.3
 
     COPY . /ops
 
