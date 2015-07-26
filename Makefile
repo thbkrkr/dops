@@ -1,5 +1,5 @@
 NAME = krkr/dops
-VERSION = 0.3
+VERSION = 0.3.1
 
 build: build-docker-machine build-image
 
