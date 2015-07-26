@@ -63,7 +63,7 @@ main() {
         && error crypt "raw files not present"
       list_encrypted_files | xargs rm -f
       ;;
-    r|rm-senstive-files)
+    r|rm-sensitive-files)
       [ ! -f $WORKDIR/config/dockercfg.json.encrypted ] \
         && error crypt "encypted files not present"
       list_sensitives_files | xargs rm -f
