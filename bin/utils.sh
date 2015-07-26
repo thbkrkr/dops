@@ -3,7 +3,7 @@
 #
 
 WORKDIR=/ops
-MACHINES_DIR=$WORKDIR/machines
+MACHINES_DIR=$WORKDIR/machine/machines
 
 PASSWORD=${PASSWORD:-"no"}
 PWD_FILE=$WORKDIR/config/.password
@@ -82,6 +82,7 @@ set_machine() {
     export DOCKER_TLS_VERIFY="1"
     export DOCKER_HOST="tcp://$IP:2376"
     export DOCKER_CERT_PATH="$machine_path"
+    export DOCKER_MACHINE_NAME="$MACHINE"
 
   elif [ "$DOCKER_CERT_PATH" != "no" ]; then
     # Assumes env vars DOCKER_* are set

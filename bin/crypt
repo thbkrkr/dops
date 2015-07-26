@@ -25,7 +25,7 @@ EOF
 }
 
 list_sensitives_files() {
-  find $WORKDIR/ansible/keys $WORKDIR/machines $WORKDIR/config \
+  find $WORKDIR/ansible/keys $WORKDIR/machine $WORKDIR/config \
     -type f \
     -name "*.json" \
     -o -name "*.pem" \
@@ -36,7 +36,7 @@ list_sensitives_files() {
 }
 
 list_encrypted_files() {
-  find $WORKDIR/ansible/keys $WORKDIR/machines $WORKDIR/config \
+  find $WORKDIR/ansible/keys $WORKDIR/machine $WORKDIR/config \
     -type f \
     -name "*.encrypted"
 }
@@ -49,14 +49,14 @@ main() {
         local ef=$f.encrypted
         encrypt $f $ef
       done
-      echo "Machines files encrypted..."
+      echo "Machine files encrypted..."
       ;;
     d|decrypt)
       for f in $(list_encrypted_files); do
         local df=$(echo "$f" | sed "s/.encrypted//")
         decrypt $f $df
       done
-      echo "Machines files decrypted..."
+      echo "Machine files decrypted..."
       ;;
     c|clean-encrypt)
       [ ! -f $WORKDIR/config/dockercfg.json ] \
