@@ -3,7 +3,10 @@
 #
 
 WORKDIR=/ops
-MACHINES_DIR=$WORKDIR/machine/machines
+MACHINE_DIR=$WORKDIR/machine
+MACHINES_DIR=$MACHINE_DIR/machines
+
+DM="docker-machine -s $MACHINE_DIR"
 
 PASSWORD=${PASSWORD:-"no"}
 PWD_FILE=$WORKDIR/config/.password

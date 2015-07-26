@@ -7,7 +7,6 @@ set -euo pipefail
 source utils.sh
 
 CREDS_PATH=$WORKDIR/config/creds-openrc.sh
-DM="docker-machine -s $WORKDIR/machine"
 
 usage() {
 cat <<-EOF
