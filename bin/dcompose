@@ -91,17 +91,18 @@ notif() {
       title="$action <b>SUCCESS</b>"
       color="green"
       bashColor="\e[0;32m"
-      more="$(format_log $output)"
+      #more="$(format_log $output)"
       ;;
     *)
       title="$action <b>FAILURE</b>"
       color="red"
       bashColor="\e[0;31m"
-      more="$(format_log $error)"
+      #more="$(format_log $error)"
       ;;
   esac
 
-  message="$title - $name $more"
+  message="$title - $name"
+  #message="$title - $name $more"
 
   if [[ "$HIPCHAT_TOKEN" != "no" ]]; then
     echo " @-> Send HipChat notification: $message to $HIPCHAT_ROOM"
