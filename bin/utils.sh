@@ -62,6 +62,10 @@ get_ip() {
     || echo "$ip"
 }
 
+refresh() {
+  . ~/.bashrc
+}
+
 # Export DOCKER_TLS_VERIFY, DOCKER_HOST and DOCKER_CERT_PATH
 # using the machines files (/ops/machines/<$MACHINE>/*) to get IP
 # or just set MACHINE if DOCKER_TLS_VERIFY is already set.
@@ -78,7 +82,7 @@ set_machine() {
     local machine_path=$MACHINES_DIR/$MACHINE
 
     [ ! -d $machine_path ] \
-      &&  error "-" "No machine directory: $machine_path"
+      && error "-" "No machine directory: $machine_path"
 
     IP=$(get_ip $machine_path)
 
@@ -96,4 +100,19 @@ set_machine() {
   else
     MACHINE=""
   fi
+
+  refresh
+}
+
+set_compose() {
+  local name=${1:-no}
+  [ "$name" == "no" ] && name=${NAME:-no}
+
+  if [ "$machine" != "no" ]; then
+    export NAME="$app"
+  else
+    export NAME=""
+  fi
+
+  refresh
 }

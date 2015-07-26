@@ -4,5 +4,6 @@ set -euo pipefail
 source utils.sh
 
 set_machine
+set_compose
 
 $@
