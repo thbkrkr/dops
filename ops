@@ -34,7 +34,7 @@ calc_md5() {
   | xargs md5sum | sort | md5sum | cut -d ' ' -f1 | cut -c-12
 }
 
-build() {
+lazy_build() {
   local md5=$1
   local force=${2:-"no"}
   local md5file=.$md5.md5sum
@@ -99,7 +99,7 @@ main() {
 
   RUN="docker run --rm $TTY $DOCKER_OPT $IMAGE:$md5"
 
-  build $md5
+  lazy_build $md5
   
   echo " --> $RUN $@..."
   $RUN $@
