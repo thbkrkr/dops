@@ -2,11 +2,11 @@
 # Utils functions.
 #
 
+MACHINES=${MACHINES:-""}
 WORKDIR=/ops
-MACHINE_DIR=$WORKDIR/machine
-MACHINES_DIR=$MACHINE_DIR/machines
-
-DM="docker-machine -s $MACHINE_DIR"
+MACHINE_STORAGE_PATH=${MACHINE_STORAGE_PATH:-$WORKDIR/machines/$MACHINES}
+MACHINES_DIR=$MACHINE_STORAGE_PATH/machines
+#DM="docker-machine -s $MACHINE_STORAGE_PATH"
 
 PASSWORD=${PASSWORD:-"no"}
 PWD_FILE=$WORKDIR/config/.password
@@ -43,6 +43,7 @@ decrypt() {
   local src=$1
   local dest=$2
   openssl aes-256-cbc -d -salt -in $src -out $dest -k $PASSWORD
+  find $MACHINE_DIR -type f | xargs chmod 600
 }
 
 # Read machine IP from machine config files.
@@ -52,19 +53,24 @@ get_ip() {
   local machine_path=$1
   local ip="null"
 
-  ip=$(jq -r .Driver.Ip $machine_path/config.json)
+  ip=$(jq -r .Driver.IPAddress $machine_path/config.json)
 
-  [ "$ip" == "null" ] \
-    && ip=$(jq -r .Driver.IPAddress $machine_path/config.json)
+  [[ "$ip" == "null" ]] \
+    && ip=$(jq -r .Driver.IP $machine_path/config.json) \
+    || echo "$ip" && return 0
 
-  [ "$ip" == "null" ] \
+  [[ "$ip" == "null" ]] \
     && error compose 'Cannot read IP in $machine_path/config.json' \
-    || echo "$ip"
+    || echo "$ip" && return 0
 }
 
 refresh() {
-  . ~/.bashrc
+  . ~/.zshrc
 }
+
+# set_group() {
+#   export MACHINES=$1
+# }
 
 # Export DOCKER_TLS_VERIFY, DOCKER_HOST and DOCKER_CERT_PATH
 # using the machines files (/ops/machines/<$MACHINE>/*) to get IP
@@ -72,16 +78,16 @@ refresh() {
 #
 set_machine() {
   local machine=${1:-no}
-  [ "$machine" == "no" ] && machine=${MACHINE:-no}
+  [[ "$machine" == "no" ]] && machine=${MACHINE:-no}
 
   DOCKER_CERT_PATH=${DOCKER_CERT_PATH:-no}
 
-  if [ "$machine" != "no" ]; then
+  if [[ "$machine" != "no" ]]; then
     MACHINE=$machine
     # Read variables from machine files
     local machine_path=$MACHINES_DIR/$MACHINE
 
-    [ ! -d $machine_path ] \
+    [[ ! -d $machine_path ]] \
       && error "-" "No machine directory: $machine_path"
 
     IP=$(get_ip $machine_path)
@@ -100,15 +106,13 @@ set_machine() {
   else
     MACHINE=""
   fi
-
-  refresh
 }
 
 set_compose() {
   local name=${1:-no}
   [ "$name" == "no" ] && name=${NAME:-no}
 
-  if [ "$machine" != "no" ]; then
+  if [ "$name" != "no" ]; then
     export NAME="$app"
   else
     export NAME=""

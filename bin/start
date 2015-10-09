@@ -1,9 +1,16 @@
 #!/bin/bash
-set -euo pipefail
+#
+# Start dops with zsh, nothing to run go-apish or another command.
+#
+set -eu
 
-source utils.sh
-
-set_machine
-set_compose
-
-$@
+case "$@" in
+    "zsh") 
+        nohup go-apish > /var/log/go-apish 2>&1 &
+        exec zsh
+        ;;
+    "")
+        exec go-apish ;;
+    "$@")
+        exec "$@" ;;
+esac

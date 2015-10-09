@@ -1,20 +1,18 @@
 #!/bin/bash
 #
-# Create VM with Docker Machine and the OpenStack driver.
+# Create a VM with Docker Machine using the OpenStack driver.
 #
 set -euo pipefail
 
-source utils.sh
-
-CREDS_PATH=$WORKDIR/config/creds-openrc.sh
+DM=docker-machine
 
 usage() {
 cat <<-EOF
-  Usage: create-openstack-vm [-n <name>] [-f <flavour>] [-i <image>] [-y]
+  Usage: create-openstack-vm [-c <api_creds_path>] [-s <storage_path>] [-n <name>] [-f <flavour>] [-i <image>] [-y]
 
   Create a VM with Docker Machine and the OpenStack driver.
 
-  A file $WORKDIR/config/creds-openrc.sh must exists with the OpenStack variables:
+  A file ~/.creds-openrc.sh must exists with the OpenStack variables:
     export OS_AUTH_URL=https://auth.cloud.ovh.net/v2.0
     export OS_TENANT_ID=1234567890
     export OS_TENANT_NAME="0987654321"
@@ -22,53 +20,67 @@ cat <<-EOF
     export OS_PASSWORD="QsDfGhJkLmMn"
     export OS_REGION_NAME"ABC"
 
+  OpenStack API Creds path and Docker machine Storage path can be set with env
+  variables \$OS_API_CREDS_PATH and \$MACHINE_STORAGE_PATH or [-c <api_creds_path>] 
+  and [-s <storage_path>].
+
   OPTIONS:
   ========
-      -n <name>     Name of the VM        (default: random name)
-      -f <flavor>   Flavor                (default: ks-1)
-      -i <image>    OS Image              (default: Ubuntu 14.04)
+      -n <name>     Name of the VM            (default: node-[0-9]*)
+      -f <flavor>   Flavor                    (default: vps-ssd-1)
+      -i <image>    OS Image                  (default: Debian 8)
       -y            No prompt
+
+      -c            OpenStack API Creds path      (default: \$OS_API_CREDS_PATH or ~/.creds-openrc.sh)
+      -s            Docker machine Storage path   (default: \$MACHINE_STORAGE_PATH or ~/.docker/machine)
 
       -h            Print this help
 EOF
 }
 
 random_word() {
-  local dict=$1
-  shuf -n1  /usr/share/dict/$dict
+  echo "node-$RANDOM"
 }
 
 main() {
   local name= flavor= imageName= netName= sshUser= prompt=1
 
-  while getopts n:f:i:yh arg 2>/dev/null
+  while getopts n:f:i:yc:s:h arg 2>/dev/null
   do
     case $arg in
         n) name=$OPTARG ;;
         f) flavor=$OPTARG ;;
         i) imageName=$OPTARG ;;
         y) prompt=0 ;;
+        c) credsPath=$OPTARG;;
+        s) storagePath=$OPTARG;;
         ?|h) usage && exit 2 ;;
     esac
   done
 
   # Default values
-  name=${name:-$(random_word qualifiers)-$(random_word names)}
+  set +u
+  OS_API_CREDS_PATH=${OS_API_CREDS_PATH:-~/.creds-openrc.sh}
+  MACHINE_STORAGE_PATH=${MACHINE_STORAGE_PATH:-~/.docker/machine}
+  set -u
+  
+  name=${name:-$(random_word)}
   flavor=${flavor:-vps-ssd-1}
-  imageName=${imageName:-"Ubuntu 14.04"}
+  imageName=${imageName:-"Debian 8"}
   netName=Ext-Net
   sshUser=admin
-  credsPath=${credsPath:-"$CREDS_PATH"}
+  credsPath=${credsPath:-"$OS_API_CREDS_PATH"}
+  storagePath=${storagePath:-"$MACHINE_STORAGE_PATH"}
 
-  [ ! -f $credsPath ] && error create-openstack-vm "$credsPath file not found"
-
-  # Source DOCKER_* variables to communicate with the remote Docker daemon
-  eval "$(cat $CREDS_PATH)"
+  # Source creds variables to communicate with the OpenStack API
+  [ ! -f $credsPath ] && echo "[error] $credsPath file not found" && exit 1
+  eval "$(cat $credsPath)"
 
   echo '{"message":"create-openstack-vm","name":"'$name'","flavor":"'$flavor'","image":"'$imageName'"}'
-  
-  echo_create_vm_cmd() {
-    echo $DM create -d openstack \
+
+  print_create_vm_cmd() {
+    echo $DM --storage-path="$storagePath"\
+      create -d openstack \
       --openstack-flavor-name="$flavor" \
       --openstack-image-name="\"$imageName\"" \
       --openstack-net-name="$netName" \
@@ -76,16 +88,21 @@ main() {
       $name
   }
   create_vm_cmd() {
-    $DM create -d openstack \
+    touch /tmp/.create-openstack-vm_$name
+    $DM --storage-path="$storagePath" \
+      create -d openstack \
       --openstack-flavor-name="$flavor" \
       --openstack-image-name="$imageName" \
       --openstack-net-name="$netName" \
       --openstack-ssh-user="$sshUser" \
       $name
+    touch /tmp/.create-openstack-vm_$name
+    echo "[OK] VM $name created"
   }
 
+  # Prompt and print create_vm_cmd or execute directly create_vm_cmd
   if [ $prompt -eq 1 ]; then
-    echo_create_vm_cmd
+    print_create_vm_cmd
     read -p "Press [Yy] to continue... " yn
     case $yn in
         [Yy]* ) create_vm_cmd ;;
@@ -96,4 +113,4 @@ main() {
   fi
 }
 
-main "$@" 
+main "$@"

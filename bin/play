@@ -4,7 +4,7 @@
 #
 set -euo pipefail
 
-ANSIBLE_VERSION=1.9.2
+ANSIBLE_VERSION=1.9.3
 
 source utils.sh
 
@@ -44,7 +44,7 @@ play() {
   local playbook=$2
   local host=$3
   echo "[info] Execute playbook: $playbook"
-  ansible-playbook -i $INVENTORIES_DIR/$inventory $PLAYBOOKS_DIR/${playbook}.yml \
+  ansible-playbook -i $inventory $PLAYBOOKS_DIR/${playbook}.yml \
     --extra-vars="host=$host" $ansible_options
 }
 
@@ -88,12 +88,15 @@ main() {
   done
 
   # Valid parameters
-  [ "$inventory" == "required" ] && error "play" "-i <inventory> parameter required"
-
-  [ ! -f $INVENTORIES_DIR/$inventory ] && error play "File $INVENTORIES_DIR/$inventory not found"
-  echo "[info] inventory: $inventory"
+  if [[ "$inventory" == "required" ]]; then
+    inventory=$(which machines.sh)
+  else
+    inventory=$INVENTORIES_DIR/$inventory
+    [[ ! -f $inventory ]] && error play "File $inventory not found"
+    echo "[info] inventory: $inventory"
+  fi
   
-  [ "$target" == "required" ] && error play "-p <playbook> or -c <cmd> parameter required"
+  [[ "$target" == "required" ]] && error play "-p <playbook> or -c <cmd> parameter required"
 
   find $WORKDIR -name "*id_rsa" | xargs chmod 600
   # FIXME: option?
@@ -101,14 +104,17 @@ main() {
 
   case "$target" in
     playbook)
-      [ ! -f $PLAYBOOKS_DIR/${playbook}.yml ] \
+      [[ ! -f $PLAYBOOKS_DIR/${playbook}.yml ]] \
         && error play "Playbook ${playbook}.yml not found"
 
-      # Decrypt all keys
-      # for file in $(ls keys)
-      # do
-      #   decrypt $KEYS_DIR/$file
-      # done
+      if [[ ! -f $VAULT_PWD_FILE ]]
+      then
+        # Decrypt all keys
+        for file in $(ls keys)
+        do
+          decrypt $KEYS_DIR/$file
+        done
+      fi
 
       play $inventory $playbook $host
       ;;

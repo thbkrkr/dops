@@ -25,7 +25,7 @@ EOF
 }
 
 list_sensitives_files() {
-  find $WORKDIR/ansible $WORKDIR/machine $WORKDIR/config \
+  find $WORKDIR/ansible $MACHINE_DIR $WORKDIR/config \
     -type f \
     -name "dockercfg.json" \
     -o -name "*.pem" \
@@ -36,7 +36,7 @@ list_sensitives_files() {
 }
 
 list_encrypted_files() {
-  find $WORKDIR/ansible $WORKDIR/machine $WORKDIR/config \
+  find $WORKDIR/ansible $MACHINE_DIR $WORKDIR/config \
     -type f \
     -name "*.encrypted"
 }
