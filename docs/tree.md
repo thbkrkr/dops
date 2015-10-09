@@ -15,7 +15,7 @@
     │       └── roles
     │           └── ...
     ├── compose
-    │   ├── app1.yml
+    │   ├── app.yml
     │   ├── backup
     │   │   ├── save.yml
     │   │   └── restore.yml
@@ -38,15 +38,32 @@
     │   │       └── Dockerfile
     │   └── ...
     ├── machines
-    │   ├── m1
-    │   │   ├── ca.pem.encrypted
-    │   │   ├── cert.pem.encrypted
-    │   │   ├── config.json.encrypted
-    │   │   ├── id_rsa.encrypted
-    │   │   ├── id_rsa.pub.encrypted
-    │   │   ├── key.pem.encrypted
-    │   │   ├── server-key.pem.encrypted
-    │   │   └── server.pem.encrypted
-    │   ├── ...
-    │   └── ...
+    │   ├── prod
+    │   │   ├── certs
+    │   │   │   ├── ca-key.pem.encrypted
+    │   │   │   ├── ca.pem.encrypted
+    │   │   │   ├── cert.pem.encrypted
+    │   │   │   └── key.pem
+    │   │   └── machines
+    │   │       └── prod-node-1
+    │   │           ├── ca.pem.encrypted
+    │   │           ├── cert.pem.encrypted
+    │   │           ├── config.json.encrypted
+    │   │           ├── id_rsa.encrypted
+    │   │           ├── id_rsa.pub.encrypted
+    │   │           ├── key.pem.encrypted
+    │   │           ├── server-key.pem.encrypted
+    │   │           └── server.pem.encrypted
+    │   └── integ
+    │       ├── certs
+    │       │   ├── ca-key.pem.encrypted
+    │       │   ├── ...
+    │       │   └── key.pem.encrypted
+    │       ├── machines
+    │       │   └── integ-node-1
+    │       │       ├── ca.pem.encrypted
+    │       │       ├── ...
+    │       │       └── server.pem.encrypted
+    │       └── machines.disabled
+    │ 
     └── Dockerfile

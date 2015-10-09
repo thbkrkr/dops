@@ -1,0 +1,24 @@
+#
+# Custom ZSH config.
+#
+
+MACHINE_STORAGE_PATH=${MACHINE_STORAGE_PATH:-/ops/machines/$MACHINES}
+
+
+help() {
+    echo ' 
+Aliases:
+
+    dme     alias   eval $(docker-machine env $1)'
+}
+
+# Aliases
+
+dme() {
+    eval $(docker-machine env $1)
+}
+
+##
+
+source ~/.autocompletion
+source ~/._docker-machine

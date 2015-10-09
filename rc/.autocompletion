@@ -1,0 +1,16 @@
+# Autocomplete aliases functions
+
+__list_machines() {
+  docker-machine ls -q
+}
+
+_list_machines() {
+    while read m
+    do
+        compadd "$m"
+    done < <(__list_machines)
+    return 0
+}
+
+compdef _list_machines dme
+compdef _list_machines set_machine

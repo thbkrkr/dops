@@ -15,7 +15,7 @@ RUN apk --update add \
   && rm -rf /var/cache/apk/*
 
 ENV GOPATH /go
-ENV DOCKER_MACHINE_VERSION 0.3.0
+ENV DOCKER_MACHINE_VERSION 0.4.1
 
 # TODO: Vendor these `go get` commands using Godep.
 RUN go get github.com/mitchellh/gox
@@ -29,4 +29,4 @@ WORKDIR /go/src/github.com/docker/machine
 RUN git clone https://github.com/docker/machine . \
   && git checkout v${DOCKER_MACHINE_VERSION}
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /build/docker-machine-${DOCKER_MACHINE_VERSION} .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o docker-machine-${DOCKER_MACHINE_VERSION} .

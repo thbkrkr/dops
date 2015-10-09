@@ -1,0 +1,45 @@
+##{
+##  "name": "krkr/dops-base",
+##}
+FROM alpine:3.2
+
+ENV DOCKER_VERSION=1.8.2 \
+    DOCKER_COMPOSE_VERSION=1.4.0 \
+    DOCKER_MACHINE_VERSION=0.4.1
+
+# Install docker and docker-compose
+RUN apk --update add bash ca-certificates curl jq \
+  && curl https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION} > /bin/docker \
+  && chmod +x /bin/docker \
+  && apk add py-pip \
+  && pip install docker-compose==${DOCKER_COMPOSE_VERSION} \
+  && rm -f /var/cache/apk/*
+
+ENV ANSIBLE_VERSION 1.9.3
+
+# Install Ansible
+RUN apk --update add \
+    openssh-client \
+    py-pip py-crypto py-yaml py-jinja2 \
+  && rm -f /var/cache/apk/* \
+  && pip install ansible==${ANSIBLE_VERSION}
+
+# Copy docker-machine
+COPY build-dm/docker-machine-${DOCKER_MACHINE_VERSION} /usr/bin/docker-machine
+
+# Install go-apish oh-my-zsh thbkrkr/dotfiles and bim config
+RUN apk --update add git zsh make && \
+    rm -f /var/cache/apk/* && \
+    mkdir -p /root/.vim/colors && mkdir /root/.vim/bundle} && \
+    wget -q https://github.com/thbkrkr/go-apish/releases/download/1.0/go-apish_linux-amd64 -O /usr/local/bin/go-apish && \
+    chmod +x /usr/local/bin/go-apish && \
+    git clone https://github.com/robbyrussell/oh-my-zsh.git /root/.oh-my-zsh && \
+    git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
+    git clone https://github.com/gmarik/Vundle.vim.git /root/.vim/bundle/Vundle.vim && \
+    curl -s https://raw.githubusercontent.com/sickill/vim-monokai/master/colors/monokai.vim > /root/.vim/colors/monokai.vim && \
+    find /root/.dotfiles -type f -name ".[a-z]*" -exec cp {} /root \;
+
+COPY dict /usr/share/dict
+COPY bin/start /usr/local/bin/start
+
+ENTRYPOINT ["start"]

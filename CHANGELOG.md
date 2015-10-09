@@ -1,6 +1,6 @@
 # 0.3 - 2015-07-26
 
-- Fix create_vm_cmd imageName
+- Fix create_vm cmd imageName
 - Fix missing machine/ directory instead of machines/
 - Set dm and dc aliases instead of symbolic links
 

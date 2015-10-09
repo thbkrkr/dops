@@ -1,2 +1,7 @@
+docs
 example
-Dockerfile
+Makefile
+Dockerfile*
+LICENSE
+README.md
+ops
