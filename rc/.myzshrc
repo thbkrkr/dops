@@ -1,0 +1,12 @@
+#
+# Custom ZSH config.
+#
+
+randword() {
+  local name=$(shuf -n 1 /usr/share/dict/names)
+  local qualifier=$(shuf -n 1 /usr/share/dict/qualifiers)
+  echo "$name-$qualifier"
+}
+
+source ~/._docker-machine
+source ~/.autocompletion

@@ -1,0 +1,10 @@
+#!/bin/bash
+set -eu
+
+main() {
+  cmd=$1
+  v=$($cmd --version | grep -o "[0-9\.]*" | head -1)
+  echo '{"'$cmd'":"'$v'"}'
+}
+
+main "$1"
