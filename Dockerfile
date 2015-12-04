@@ -4,7 +4,7 @@
 FROM krkr/dops-base
 
 # Install git, zsh, make, oh-my-zsh, vim config and go-apish
-RUN apk --update add git zsh make && \
+RUN apk --update add bash git zsh make jq && \
     rm -f /var/cache/apk/* && \
     git clone https://github.com/robbyrussell/oh-my-zsh.git /root/.oh-my-zsh && \
     mkdir -p /root/.vim/colors && mkdir /root/.vim/bundle} && \
