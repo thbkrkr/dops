@@ -4,23 +4,23 @@
 
 TF_STATE=$MACHINE_STORAGE_PATH/terraform.tfstate
 
-SSH_USER="admin"
-SSH_PRIVATE_KEY_FILE="/ops/ssh/admin.id_rsa"
+SSH_USER="${SSH_USER:-admin}"
+SSH_PRIVATE_KEY_FILE="${SSH_PRIVATE_KEY_FILE:-/ops/ssh/admin.id_rsa}"
 
 provider="openstack"
 type_key="openstack_compute_instance_v2"
 ip_key="access_ip_v4"
 
 hosts() {
-  jq '.modules[0].resources | 
-    to_entries | map(.value) | 
-    map(select(.type == "'$type_key'")) | 
-    .[] | 
+  jq '.modules[0].resources |
+    to_entries | map(.value) |
+    map(select(.type == "'$type_key'")) |
+    .[] |
     .primary.attributes' $TF_STATE
 }
 
 groups() {
-  hosts | jq -s 'map(.["metadata.group"]) | unique' | jq -r .[]
+  hosts | jq -s 'map(.["metadata.group"])[] | split(",") | .[]' | jq -s '. | unique' | jq -r .[]
 }
 
 main() {
@@ -33,11 +33,12 @@ main() {
     echo '{'
     echo '"all" : '$all''
     comma=,
+
     for group in $(groups)
     do
       echo $comma
       echo '"'$group'":'
-      hosts | jq 'select(.["metadata.group"] == "'$group'") .name' | jq -s .
+      hosts | jq 'select(.["metadata.group"] | split(",") | .[] | . == "'$group'") .name' | jq -s .
     done
     echo '}'
     ;;
