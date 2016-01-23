@@ -11,13 +11,13 @@ RUN apk --update add bash git zsh make jq && \
     git clone https://github.com/gmarik/Vundle.vim.git /root/.vim/bundle/Vundle.vim && \
     curl -s https://raw.githubusercontent.com/sickill/vim-monokai/master/colors/monokai.vim \
       > /root/.vim/colors/monokai.vim && \
-    wget -q https://github.com/thbkrkr/go-apish/releases/download/1.1/go-apish_linux-amd64 \
+    wget -q https://github.com/thbkrkr/go-apish/releases/download/1.2/go-apish_linux-amd64 \
       -O /usr/local/bin/go-apish && \
     chmod +x /usr/local/bin/go-apish
 
 # Install thbkrkr/dotfiles
 RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
-    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout 31d67fb9c84 && \
+    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout f1ca888 && \
     curl -s https://raw.githubusercontent.com/thbkrkr/dotfiles/master/resources/pure-thb.zsh-theme \
       > /root/.oh-my-zsh/themes/pure-thb.zsh-theme && \
     find /root/.dotfiles -type f -name ".[a-z]*" -exec cp {} /root \; && \
