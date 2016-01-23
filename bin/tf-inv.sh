@@ -12,11 +12,12 @@ type_key="openstack_compute_instance_v2"
 ip_key="access_ip_v4"
 
 hosts() {
-  jq '.modules[0].resources |
-    to_entries | map(.value) |
+  jq '.modules[] |
+    .resources | to_entries |
+    map(.value) |
     map(select(.type == "'$type_key'")) |
     .[] |
-    .primary.attributes' $TF_STATE
+    .primary.attributes' $MACHINE_STORAGE_PATH/terraform.tfstate
 }
 
 groups() {
