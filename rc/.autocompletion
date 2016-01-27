@@ -13,5 +13,6 @@ _list_machines() {
 }
 
 # Autocomplete dme/dmes aliases with docker machines
+compdef _list_machines denv
 compdef _list_machines dme
 compdef _list_machines dmes

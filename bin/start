@@ -1,0 +1,40 @@
+#!/bin/bash -u
+
+source_docker_env() {
+  export ERROR=""
+  eval $(_denv.sh)
+  if [[ "$ERROR" != "" ]]; then
+    echo
+    echo "$ERROR"
+    echo
+  fi
+}
+
+ascii_welcome() {
+  echo '      _
+   __| | ___  _ __  ___
+  / _` |/ _ \| |_ \/ __|
+ | (°| < (#) < |_) \__ \
+  \__,_|\___/| .__/|___/
+             |_|
+ -----------------------
+ Welcome in dops!'
+}
+
+main() {
+  local arg="${@:-"zsh"}"
+
+  case "$arg" in
+    zsh)
+      WELCOME=${WELCOME:-""}
+      [[ "$WELCOME" != "" ]] && ascii_welcome
+      source_docker_env
+      exec zsh
+      ;;
+    *)
+      exec "$@"
+    ;;
+  esac
+}
+
+main "$@"

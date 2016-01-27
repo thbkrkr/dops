@@ -11,10 +11,11 @@ Based on the [Alpine Linux](https://www.alpinelinux.org).
 
 ## Using dops
 
-	docker run --rm -ti \
-		-v $(pwd):/ops \
-		-e MACHINE_STORAGE_PATH=/ops/machines \
-		dops
+    docker run --rm -ti \
+      -v $(pwd):/ops \
+      --env-file $(pwd)/machine/os-api-creds.env \
+      -e MACHINE_STORAGE_PATH=/ops/machine \
+      krkr/dops:1.2
 
 ## License
 

@@ -6,7 +6,7 @@ __dops() {
     echo '
       go
       exec
-      cluster:add
+      machine:add
       update
     '
   }

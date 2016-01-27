@@ -8,5 +8,17 @@ randword() {
   echo "$name-$qualifier"
 }
 
+denv() { source _denv.sh "$@"; }
+
 source ~/._docker-machine
 source ~/.autocompletion
+
+list_bin_paths() {
+  local _ops_bin_paths=""
+  while read bin_dir; do
+    _ops_bin_paths="$ops_bin_paths:$bin_dir"
+  done < <(find /ops -name bin -type d)
+  echo "$_ops_bin_paths"
+}
+
+export PATH=$PATH:$(list_bin_paths)
