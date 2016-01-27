@@ -1,0 +1,160 @@
+#!/bin/bash
+#
+# Enter or execute commands in the dops Docker image.
+#
+
+here=$(dirname $(readlink -f $0))
+
+DOPS_IMAGE=krkr/dops
+DOPS_VERSION=latest
+
+help() {
+    echo 'Usage: dops COMMAND
+
+Commands
+
+  go                Enter in dops
+  exec              Execute a command in dops
+
+  volume:build      Build a machine volume
+
+  update            Update dops'
+}
+
+create_machine_volume() {
+  local container=$VOLUME_NAME
+  local image=$VOLUME_IMAGE
+  local mode=${1:-ro}
+
+  is=$(docker ps -a --filter=name=$container | grep $container'$' | wc -l)
+
+  if [ $is -ne 1 ]; then
+    echo " --> [$MACHINE-dops] Create volume $MACHINE..."
+    case $mode in
+      rw) LOCAL_MACHINE_STORAGE_PATH=$(pwd)/machine
+          # FIXME
+          [ ! -f $LOCAL_MACHINE_STORAGE_PATH/dops-volume.json ] &&
+            echo "error: cannot creat machine volume. $LOCAL_MACHINE_STORAGE_PATH/dops-volume.json not found" && exit 1
+          docker create --name $container $image \
+            -v $LOCAL_MACHINE_STORAGE_PATH/machine:/root/.docker/machine
+          ;;
+      *)  docker create --name $container $image
+          ;;
+    esac
+  fi
+}
+
+get-os-creds() {
+  machines=$(jq -r .cluster dops.json)
+  if [[ "$machines" == "null" ]]; then
+    echo "error: machines not found in dops.json" && exit 1
+  fi
+}
+
+env_files() {
+  local arg=""
+  while read env_file; do
+    arg="$arg --env-file=$env_file"
+  done < <(find . -name "*.env" -type f)
+  echo "$arg"
+}
+
+zsh_dops_rw() {
+  local container=$MACHINE-dops
+  echo " --> [$container] go in dops..."
+
+  create_machine_volume
+
+  is=$(docker ps -a --filter=name=$container | grep $container'$' | wc -l)
+  if [ $is -ne 1 ]; then
+    docker run --rm -ti \
+      --name $container \
+      -v $(pwd):/ops \
+      --volumes-from $VOLUME_NAME \
+      $(env_files) \
+      $DOPS_IMAGE:$DOPS_VERSION zsh
+  else
+    docker exec -ti $container zsh
+  fi
+}
+
+exec_in_dops() {
+  local container=$MACHINE-dops
+  create_machine_volume rw
+
+  docker run --rm \
+    --name $container \
+    --volumes-from machine-$MACHINE \
+    $DOPS_IMAGE:$DOPS_VERSION $@
+}
+
+read_config() {
+  if [[ -f dops.json ]]; then
+    MACHINE=$(jq -r .machine_volume dops.json)
+
+    VOLUME_IMAGE=machine/$MACHINE
+    VOLUME_NAME=machine-$MACHINE
+  fi
+
+  [[ "$MACHINE" == "" ]] && \
+    echo "error: machine_volume undefined" && exit 1
+}
+
+build_volume() {
+  if [[ -f dops-volumes.json ]]; then
+    local volume=$(jq -r .volume dops-volumes.json)
+    [[ "$volume" == "null" ]] && echo "error: volume not found" && exit 1
+
+    local image=$VOLUME_IMAGE
+
+    dockerfile=".$(date +%s).Dockerfile"
+    trap "rm -f $dockerfile" EXIT
+    echo '
+FROM scratch
+COPY . '$volume'
+VOLUME '$volume'
+ENTRYPOINT ["/bin/true"]' > $dockerfile
+
+    docker build -t $image -f $dockerfile .
+    echo
+    docker images | grep $image
+
+  else
+    echo "error: no dops config file found" && exit 1
+  fi
+}
+
+
+
+main() {
+  local cmd=${1:-""} && shift
+  case $cmd in
+    go)
+      read_config
+      zsh_dops_rw "$@"
+      ;;
+    exec)
+      read_config
+      [[ "$1" == "" ]] && echo "error: no command to exec" && exit 1
+      exec_in_dops "$@"
+      ;;
+    cluster:add)
+      build_volume
+      ;;
+    update)
+      docker pull $DOPS_IMAGE:$DOPS_VERSION
+      ;;
+    -h|--help)
+      help
+      ;;
+    "")
+      help
+      ;;
+    *)
+      echo "error: unknown command"
+      help
+      ;;
+  esac
+}
+
+main "$@"

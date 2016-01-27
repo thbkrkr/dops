@@ -1,0 +1,18 @@
+# dops autocompletion
+
+
+__dops() {
+  dops_cmds() {
+    echo '
+      go
+      exec
+      cluster:add
+      update
+    '
+  }
+  while read cmd; do
+    compadd $cmd
+  done < <(dops_cmds)
+}
+
+compdef __dops dops
