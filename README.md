@@ -24,10 +24,25 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 
 #### zsh in dops
 
+    ~/dev/docker/dops master **  thb@io
+    > m go
     docker run --rm -ti \
-      -v $(pwd):/ops \
-      -e MACHINE_STORAGE_PATH=/ops/machine \
-      krkr/dops
+            -v $(pwd):/ops \
+            -e MACHINE_STORAGE_PATH=/ops/machines \
+            krkr/dops:latest
+          _
+       __| | ___  _ __  ___
+      / _` |/ _ \| |_ \/ __|
+     | (°| < (#) < |_) \__ \
+      \__,_|\___/| .__/|___/
+                 |_|
+     -----------------------
+     Welcome in dops!
+
+    No docker MACHINE defined. No docker environment set!
+
+    /ops master **  [cluster:machines]  root@494f4847e993 [indocker]
+    > ...
 
 #### Create a VM on [OVH Cloud](https://www.ovh.com/fr/vps/vps-ssd.xml)
 
@@ -50,19 +65,19 @@ Create a VM using docker-machine and the [OVH driver](https://github.com/yadutaf
       krkr/dops \
         docker-machine create -d ovh node-1
 
-#### Terraform
+#### Or create your infra with Terraform
 
-Write terrform config files in [machine/](https://github.com/thbkrkr/swarm-up/tree/master/machines).
+Write Terraform config files (example: [create a Swarm cluster](https://github.com/thbkrkr/swarm-up/blob/master/machines/bim/swarm.tf)).
 
     > docker run --rm -ti \
       -v $(pwd):/ops \
-      -w machine \
+      -w machine/bim \
       krkr/dops \
         terraform apply
 
-#### Ansible
+#### Or run Ansible
 
-Write [playbooks](https://github.com/thbkrkr/swarm-up/tree/master/ansible).
+Write [inventory](https://github.com/thbkrkr/swarm-up/blob/master/ansible/inventory/bim/machines.sh) and [playbooks](https://github.com/thbkrkr/swarm-up/blob/master/ansible%2Fplaybooks%2Fswarm.yml) (example to install docker-machine on nodes managed by Terraform).
 
     > docker run --rm -ti \
       -v $(pwd):/ops \

@@ -26,6 +26,7 @@ go:
 	docker run --rm -ti \
 		-v $$(pwd):/ops \
 		-e MACHINE_STORAGE_PATH=/ops/machines \
+		-e QUIET=no \
 		$(NAME):latest
 
 versions:
