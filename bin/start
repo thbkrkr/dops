@@ -26,8 +26,8 @@ main() {
 
   case "$arg" in
     zsh)
-      WELCOME=${WELCOME:-""}
-      [[ "$WELCOME" != "" ]] && ascii_welcome
+      TTY=${TTY:-""}
+      [[ "$TTY" != "" ]] && ascii_welcome
       source_docker_env
       exec zsh
       ;;

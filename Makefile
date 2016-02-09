@@ -5,7 +5,8 @@ build: build-base-image build-image
 
 build-base-image:
 	@echo "Build $(NAME)-base:latest..."
-	docker build --rm -t $(NAME)-base:latest  -f Dockerfile.base .
+	@cd base && \
+	docker build --rm -t $(NAME)-base:latest .
 
 build-image:
 	@echo "Build $(NAME):latest..."
@@ -27,12 +28,12 @@ go:
 		-e MACHINE_STORAGE_PATH=/ops/machines \
 		$(NAME):latest
 
-test:
+versions:
+	@docker run --rm $(NAME):latest whichversion bash
 	@docker run --rm $(NAME):latest whichversion curl
 	@docker run --rm $(NAME):latest whichversion jq
-	@docker run --rm $(NAME):latest whichversion bash
-	@docker run --rm $(NAME):latest whichversion terraform
 	@docker run --rm $(NAME):latest whichversion docker
 	@docker run --rm $(NAME):latest whichversion docker-machine
 	@docker run --rm $(NAME):latest whichversion docker-compose
 	@docker run --rm $(NAME):latest whichversion ansible
+	@docker run --rm $(NAME):latest whichversion terraform
