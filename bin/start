@@ -26,8 +26,8 @@ main() {
 
   case "$arg" in
     zsh)
-      TTY=${TTY:-""}
-      [[ "$TTY" != "" ]] && ascii_welcome
+      QUIET=${QUIET:-"yes"}
+      [[ "$QUIET" != "yes" ]] && ascii_welcome
       source_docker_env
       exec zsh
       ;;
