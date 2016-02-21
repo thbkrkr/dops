@@ -35,6 +35,7 @@ _docker_machine_cmds=(
   'ip:Get the IP address of a machine' \
   'kill:Kill a machine' \
   'ls:List machines' \
+  'provision:Re-provision existing machines' \
   'regenerate-certs:Regenerate TLS Certificates for a machine' \
   'restart:Restart a machine' \
   'rm:Remove a machine' \
@@ -218,7 +219,15 @@ __ls() {
     '--quiet[Enable quiet mode]'
 }
 
+__provision() {
+  __machines
+}
+
 __restart() {
+  __machines
+}
+
+__regenerate-certs() {
   __machines
 }
 
@@ -280,6 +289,10 @@ __dm() {
       __kill ;;
     ls)
       __ls ;;
+    provision)
+      __provision ;;
+    regenerate-certs)
+      __regenerate-certs ;;
     restart)
       __restart ;;
     rm)
