@@ -25,32 +25,32 @@ build_machine_volume() {
   if [[ -f dops-volume.json ]]; then
 
     local name=$(jq  -r .name  dops-volume.json)
-    [[ "$name" == "null" ]] && echo "error: name not found" && exit 1
+    [[ "$name" == "null" ]] && echo "error: name not found in dops-volume.json" && exit 1
 
     local volume=$(jq -r .volume dops-volume.json)
-    [[ "$volume" == "null" ]] && echo "error: volume not found" && exit 1
+    [[ "$volume" == "null" ]] && volume=/root/.docker/machine
+  else
+    echo "error: dops-volume.json config file not found" && exit 1
+  fi
 
-    local image="machine/$name"
+  local image="machine/$name"
 
-    # FIXME
-    sudo chown -R $USER:$USER .
+  # FIXME
+  sudo chown -R $USER:$USER .
 
-    dockerfile=".$(date +%s).Dockerfile"
-    trap "rm -f $dockerfile" EXIT
-    echo '
+  dockerfile=".$(date +%s).Dockerfile"
+  trap "rm -f $dockerfile" EXIT
+  echo '
 FROM scratch
 COPY . '$volume'
 VOLUME '$volume'
 ENTRYPOINT ["/bin/true"]
 ' \
-    > $dockerfile
+  > $dockerfile
 
-    docker build -t $image -f $dockerfile .
-    echo
-    docker images | grep $image
-    else
-    echo "error: dops-volume.json config file not found" && exit 1
-  fi
+  docker build -t $image -f $dockerfile .
+  echo
+  docker images | grep $image
 }
 
 create_machine_volume() {

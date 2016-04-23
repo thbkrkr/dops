@@ -1,8 +1,11 @@
 #!/bin/bash -u
 
+# Maybe set /ops/machine as default MACHINE_STORAGE_PATH
+export MACHINE_STORAGE_PATH=${MACHINE_STORAGE_PATH:-/ops/machine}
+
 source_docker_env() {
   export ERROR=""
-  eval $(_denv.sh)
+  eval $(__docker_env.sh)
   if [[ "$ERROR" != "" ]]; then
     echo
     echo "$ERROR"
@@ -11,6 +14,8 @@ source_docker_env() {
 }
 
 ascii_welcome() {
+  QUIET=${QUIET:-"yes"}
+  [[ "$QUIET" == "yes" ]] && \
   echo '      _
    __| | ___  _ __  ___
   / _` |/ _ \| |_ \/ __|
@@ -18,20 +23,21 @@ ascii_welcome() {
   \__,_|\___/| .__/|___/
              |_|
  -----------------------
- Welcome in dops!'
+ Yo!'
 }
 
 main() {
+
   local arg="${@:-"zsh"}"
 
   case "$arg" in
     zsh)
-      QUIET=${QUIET:-"yes"}
-      [[ "$QUIET" != "yes" ]] && ascii_welcome
+      ascii_welcome
       source_docker_env
       exec zsh
       ;;
     *)
+      source_docker_env
       exec "$@"
     ;;
   esac
