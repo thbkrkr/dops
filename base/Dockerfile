@@ -10,9 +10,9 @@ RUN apk --update add openssh-client \
     pip install ansible==${ANSIBLE_VERSION}
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.6.10
+ENV TERRAFORM_VERSION 0.6.15
 RUN apk --update add ca-certificates && \
-    wget -q -O /terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" && \
+    curl -sSkL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" > /terraform.zip && \
     unzip /terraform.zip && rm /terraform.zip && \
     mv terraform* /usr/local/bin && \
     chmod +x /usr/local/bin/terraform*
