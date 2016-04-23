@@ -1,6 +1,9 @@
 NAME = krkr/dops
 VERSION = 1.2
 
+go: build-image
+	doo r
+
 build: build-base-image build-image
 
 build-base-image:
@@ -10,24 +13,17 @@ build-base-image:
 
 build-image:
 	@echo "Build $(NAME):latest..."
-	docker build --rm -t $(NAME):latest .
+	doo b
 
-release: tag push
+# release: tag push
 
-tag:
-	docker tag -f $(NAME):latest $(NAME):$(VERSION)
+# tag:
+# 	docker tag -f $(NAME):latest $(NAME):$(VERSION)
 
-push:
-	docker push $(NAME)
+# push:
+# 	docker push $(NAME)
 
 #
-
-go:
-	docker run --rm -ti \
-		-v $$(pwd):/ops \
-		-e MACHINE_STORAGE_PATH=/ops/machines \
-		-e QUIET=no \
-		$(NAME):latest
 
 versions:
 	@docker run --rm $(NAME):latest whichversion bash
