@@ -17,7 +17,7 @@ RUN apk --update add bash git zsh make jq && \
 
 # Install thbkrkr/dotfiles
 RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
-    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout c5405f765bcaa3bf && \
+    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout afa0521 && \
     cp /root/.dotfiles/resources/pure-thb.zsh-theme /root/.oh-my-zsh/themes/pure-thb.zsh-theme && \
     find /root/.dotfiles -type f -name ".[a-z]*" -exec cp {} /root \; && \
     sed -i "s|root:x:0:0:root:/root:/bin/ash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd
