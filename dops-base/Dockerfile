@@ -5,9 +5,10 @@ FROM krkr/docker-toolbox
 
 # Install Ansible
 ENV ANSIBLE_VERSION 1.9.4
-RUN apk --update add openssh-client \
-    py-pip py-crypto py-yaml py-jinja2 && \
-    pip install ansible==${ANSIBLE_VERSION}
+RUN apk --update add build-base python-dev libffi-dev \
+    openssl-dev py-pip py-crypto py-yaml py-jinja2 openssh-client && \
+    pip install ansible==${ANSIBLE_VERSION} && \
+    apk del build-base python-dev openssl-dev libffi-dev
 
 # Install Terraform
 ENV TERRAFORM_VERSION 0.6.15
