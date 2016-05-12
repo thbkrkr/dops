@@ -1,5 +1,7 @@
 # dops
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/krkr/dops.svg)](https://hub.docker.com/r/krkr/dops/)
+
 A Docker image with ops tools:
   - [Docker](https://docs.docker.com)
   - [Docker Machine](https://docs.docker.com/machine/)
