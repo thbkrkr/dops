@@ -24,7 +24,7 @@ RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
 
 RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/a31f0de5c644c7d31f6cfa67c51a856a9ac44552/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
-    curl -skL https://github.com/thbkrkr/ons/releases/download/1.1/ons \
+    curl -skL https://github.com/thbkrkr/ons/releases/download/1.2/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
 
 COPY dict /usr/share/dict
