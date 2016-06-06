@@ -22,7 +22,7 @@ RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
     find /root/.dotfiles -type f -name ".[a-z]*" -exec cp {} /root \; && \
     sed -i "s|root:x:0:0:root:/root:/bin/ash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd
 
-RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/a31f0de5c644c7d31f6cfa67c51a856a9ac44552/doo \
+RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/ec9d438c5476ef88280cfa14a1abb6cb5e7cf23d/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.2/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
