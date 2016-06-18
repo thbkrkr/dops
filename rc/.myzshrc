@@ -13,6 +13,7 @@ denv() { source _denv.sh "$@"; }
 source ~/.rc/._docker-machine
 source ~/.rc/.autocompletion
 
+# Automatically set all bin/ directories in the PATH
 list_bin_paths() {
   local _ops_bin_paths=""
   while read bin_dir; do
@@ -21,88 +22,10 @@ list_bin_paths() {
   echo "$_ops_bin_paths"
 }
 
+# Aliases
+
+dmssh() {
+  docker-machine ssh $DOCKER_MACHINE_NAME
+}
+
 export PATH=$PATH:$(list_bin_paths)
-
-# -- dnsovh
-
-DNS_STATE_PATH=dns/dns.state
-
-dnshelp() {
-  echo '
-    dnsls
-    dnsplan
-    dnsapply
-    dnsadd
-    dnsrm
-    dnsdupl
-'
-}
-
-dnsls() {
-  dnsovh -c show | jq -c '.[]'
-}
-
-dnsplan() {
-  dnsovh -c plan | jq -c '.[]'
-}
-
-dnsapply() {
-  dnsovh -c apply
-}
-
-dnsadd() {
-  local subDomain=${1}
-  local machine=${2:-DOCKER_MACHINE_NAME}
-
-  ip=$(docker-machine ip $machine)
-  [[ $? -ne 0 ]] && return 1
-
-  cp $DNS_STATE_PATH $DNS_STATE_PATH.backup
-  echo '[{"target":"'$ip'","subDomain":"'$subDomain'"}] '$(cat $DNS_STATE_PATH.backup) \
-    | jq -s add | jq '. | unique ' \
-  > $DNS_STATE_PATH
-
-  dnsovh -c plan | jq -c '.[]'
-
-  echo
-  echo "Add this DNS record? [y/N]"
-  read yn
-  case $yn in
-    y ) dnsovh -c apply ;;
-    * ) return 1 ;;
-  esac
-}
-
-dnsrm() {
-  local subDomain=$1
-  declare record=$(dnsovh -c show | jq -c '.[] | select(.subDomain=="'$subDomain'")')
-  if [[ "$record" == nil ]]; then
-    echo "err: no record found"
-    return 1
-  fi
-
-  declare record=$(jq -c . <<< "$record")
-  declare ip=$(jq -r .target <<< $record)
-  [[ "$record" == "" ]] && echo "err: record $subDomain not found" && return 1
-
-  jq . <<< $record
-  echo "Delete this DNS record? [y/N]"
-  read yn
-  case $yn in
-    y )
-      dnsovh -c delete -id $(dnsovh -c show | jq '.[] | select(.subDomain=="'$subDomain'") | .id')
-      cp $DNS_STATE_PATH $DNS_STATE_PATH.backup
-      echo
-      jq '. - [{"subDomain":"'$subDomain'","target":"'$ip'"}]' $DNS_STATE_PATH.backup > $DNS_STATE_PATH
-    ;;
-    * ) return 1 ;;
-  esac
-}
-
-dnsdupl() {
-  zone=$(dnsovh -c show | jq -c .)
-  while read ip; do
-    to_delete=$(jq '.[] | select(.target=="158.69.70.140")' <<< "$zone")
-    echo "dns to_delete? $to_delete"
-  done < <(dm ip $(dm ls -q))
-}
