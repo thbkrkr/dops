@@ -17,12 +17,12 @@ RUN apk --update add bash git zsh make jq && \
 
 # Install thbkrkr/dotfiles
 RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
-    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout afa0521 && \
+    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout 1e7552e && \
     cp /root/.dotfiles/resources/pure-thb.zsh-theme /root/.oh-my-zsh/themes/pure-thb.zsh-theme && \
     find /root/.dotfiles -type f -name ".[a-z]*" -exec cp {} /root \; && \
     sed -i "s|root:x:0:0:root:/root:/bin/ash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd
 
-RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/ec9d438c5476ef88280cfa14a1abb6cb5e7cf23d/doo \
+RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/1246bc77a21026e46c96dcb4cec8163f2ab7c6b6/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.2/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
