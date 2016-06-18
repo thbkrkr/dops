@@ -14,8 +14,8 @@ source_docker_env() {
 }
 
 ascii_welcome() {
-  QUIET=${QUIET:-"yes"}
-  [[ "$QUIET" == "yes" ]] && \
+  QUIET=${QUIET:-"no"}
+  [[ "$QUIET" == "no" ]] && \
   echo '      _
    __| | ___  _ __  ___
   / _` |/ _ \| |_ \/ __|
