@@ -1,0 +1,26 @@
+#!/bin/bash -eu
+#
+# Call Docker Remote API for all machines in docker-machine.
+#
+set -o pipefail
+
+list_containers() {
+  local node=$1
+
+  declare ip=$(docker-machine ip $node)
+  declare cert_path=$MACHINE_STORAGE_PATH/machines/$node
+
+  curl -sk --cert $cert_path/cert.pem --key $cert_path/key.pem \
+    https://$ip:2376/containers/json
+}
+
+main() {
+  (
+    while read node; do
+      list_containers $node | jq .[] &
+    done < <(docker-machine ls -q)
+    wait
+  ) | jq -s .
+}
+
+main
