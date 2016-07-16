@@ -1,0 +1,22 @@
+#!/bin/bash -eu
+#
+# List all machines using docker-machine ls
+#
+
+main() {
+  docker-machine ls --format '{
+    "Name": "{{.Name}}",
+    "Active": "{{.Active}}",
+    "ActiveHost": "{{.ActiveHost}}",
+    "ActiveSwarm": "{{.ActiveSwarm}}",
+    "DriverName": "{{.DriverName}}",
+    "State": "{{.State}}",
+    "URL": "{{.URL}}",
+    "Swarm": "{{.Swarm}}",
+    "Error": "{{.Error}}",
+    "DockerVersion": "{{.DockerVersion}}",
+    "ResponseTime": "{{.ResponseTime}}"
+  }' | jq -s .
+}
+
+main
