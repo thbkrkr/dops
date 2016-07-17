@@ -27,10 +27,14 @@ RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/1db3acf82238ef483a458d
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.2/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
 
+RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
+        | tar -xz -C /usr/local/bin
+
 COPY dict /usr/share/dict
 COPY bin /usr/local/bin
 COPY rc /root/.rc
 COPY rc/.myzshrc /root/.myzshrc
+COPY rc/gotty.config /root/.gotty
 
 WORKDIR /ops
 ENTRYPOINT ["start"]

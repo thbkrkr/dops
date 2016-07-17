@@ -31,6 +31,12 @@ main() {
   local arg="${@:-"zsh"}"
 
   case "$arg" in
+    gotty)
+        sed -i \
+          -e "s|password|${GOTTY_PASSWORD:-"password"}|" \
+            /root/.gotty
+        exec gotty zsh
+      ;;
     zsh)
       ascii_welcome
       source_docker_env
