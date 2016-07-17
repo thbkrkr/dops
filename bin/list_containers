@@ -1,26 +1,37 @@
 #!/bin/bash -eu
 #
-# Call Docker Remote API for all machines in docker-machine.
+# List all containers by calling Docker Remote API for all machines
+# listed by docker-machine.
 #
 set -o pipefail
 
 list_containers() {
-  local node=$1
+  local machine=$1
+  declare ip=$(docker-machine ip $machine)
+  declare certs=$MACHINE_STORAGE_PATH/machines/$machine
 
-  declare ip=$(docker-machine ip $node)
-  declare cert_path=$MACHINE_STORAGE_PATH/machines/$node
-
-  curl -sk --cert $cert_path/cert.pem --key $cert_path/key.pem \
+  curl -sk --cert $certs/cert.pem --key $certs/key.pem \
     https://$ip:2376/containers/json
 }
 
 main() {
+  trap "rm -f .tmp.n*" 0 1 2 3 6 9 14 15
+
+  # Call each docker daemon in parallel
+  while read machine; do
+    list_containers $machine > .tmp.$machine &
+  done < <(docker-machine ls -q)
+  wait
+
+  # Return a JSON object that aggregates all services from all machines
   (
-    while read node; do
-      list_containers $node | jq .[] &
+    while read machine; do
+      echo '{
+        "'$machine'": '$(cat .tmp.$machine)'
+      }'
     done < <(docker-machine ls -q)
     wait
-  ) | jq -s .
+  ) | jq -c -s add
 }
 
 main
