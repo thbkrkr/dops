@@ -1,10 +1,10 @@
 #!/bin/bash -eu
 #
-# List all machines using docker-machine ls
+# List all machines using docker-machine ls formatting in JSON
 #
+set -o pipefail
 
-main() {
-  docker-machine ls --format '{
+docker-machine ls --format '{
     "Name": "{{.Name}}",
     "Active": "{{.Active}}",
     "ActiveHost": "{{.ActiveHost}}",
@@ -16,7 +16,4 @@ main() {
     "Error": "{{.Error}}",
     "DockerVersion": "{{.DockerVersion}}",
     "ResponseTime": "{{.ResponseTime}}"
-  }' | jq -s .
-}
-
-main
+}' | jq -c -s .
