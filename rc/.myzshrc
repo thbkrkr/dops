@@ -2,13 +2,19 @@
 # Custom ZSH config.
 #
 
+# Aliases
+
+dmssh() {
+  docker-machine ssh $DOCKER_MACHINE_NAME
+}
+
 randword() {
   local name=$(shuf -n 1 /usr/share/dict/names)
   local qualifier=$(shuf -n 1 /usr/share/dict/qualifiers)
   echo "$name-$qualifier"
 }
 
-denv() { source _denv.sh "$@"; }
+denv() { eval $(MACHINE=n2 __docker_env.sh) }
 
 source ~/.rc/._docker-machine
 source ~/.rc/.autocompletion
@@ -22,10 +28,10 @@ list_bin_paths() {
   echo "$_ops_bin_paths"
 }
 
-# Aliases
-
-dmssh() {
-  docker-machine ssh $DOCKER_MACHINE_NAME
-}
-
 export PATH=$PATH:$(list_bin_paths)
+
+# Source secrets.env if present
+if [[ -f /ops/machine/secrets.env ]]; then
+  export $(cat /ops/machine/secrets.env | grep -v '^#' | xargs)
+fi
+
