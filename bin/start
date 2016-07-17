@@ -31,11 +31,14 @@ main() {
   local arg="${@:-"zsh"}"
 
   case "$arg" in
-    gotty)
-        sed -i \
-          -e "s|password|${GOTTY_PASSWORD:-"password"}|" \
-            /root/.gotty
-        exec gotty zsh
+    console)
+        if [[ ! -z $GOTTY_CREDENTIAL ]]; then
+          echo "---> credential = $GOTTY_CREDENTIAL"
+          sed -i \
+            -e "s|x:changemeplease|$GOTTY_CREDENTIAL|" \
+              /root/.gotty
+        fi
+        exec gotty start zsh
       ;;
     zsh)
       ascii_welcome
