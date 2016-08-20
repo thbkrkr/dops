@@ -24,7 +24,7 @@ RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
 
 RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/1db3acf82238ef483a458d0aeceed0e8c63ddd1c/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
-    curl -skL https://github.com/thbkrkr/ons/releases/download/1.2/ons \
+    curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
 
 RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
