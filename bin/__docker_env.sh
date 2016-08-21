@@ -27,6 +27,7 @@ get_swarm_master() {
 }
 
 set_machine() {
+  [[ ! -z $M ]] && MACHINE=$M
   [[ ! -z $MACHINE ]] && return
 
   # Try to get a swarm master
