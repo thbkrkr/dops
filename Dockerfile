@@ -37,4 +37,4 @@ COPY rc/.myzshrc /root/.myzshrc
 COPY rc/gotty.config /root/.gotty
 
 WORKDIR /ops
-ENTRYPOINT ["start"]
+ENTRYPOINT ["run"]
