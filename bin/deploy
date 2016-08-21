@@ -1,0 +1,41 @@
+#!/bin/bash -eu
+#
+# Deploy compose files.
+#
+# ./deploy -i krkr/squid -f n2
+#
+
+list_compose_by_image() {
+  declare image=$1
+  declare machine=$2
+  grep -r "$image" compose/$machine/*.yml | sed "s|:\s*.*||" | sort | uniq
+}
+
+list_compose_by_filter() {
+  declare filter=$1
+  declare machine=$2
+  ls -1 compose/$machine/*.yml | grep "$filter"
+}
+
+main() {
+  local list_compose="list_compose_by_filter compose"
+  while getopts "f:i:d" arg; do
+    case $arg in
+      f) list_compose="list_compose_by_filter $OPTARG" && shift && shift ;;
+      i) list_compose="list_compose_by_image $OPTARG" && shift && shift ;;
+    esac
+  done
+  CMD="${@:-ps}"
+
+  for m in $(docker-machine ls -q); do
+    echo "> machine $m"
+    eval $(MACHINE=$m __docker_env.sh)
+    for c in $($list_compose $m); do
+      doo dc $c $CMD
+    done
+  done
+
+  wait
+}
+
+main "$@"
