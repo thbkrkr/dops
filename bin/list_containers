@@ -11,7 +11,7 @@ list_containers() {
   declare certs=$MACHINE_STORAGE_PATH/machines/$machine
 
   curl -sk --cert $certs/cert.pem --key $certs/key.pem \
-    https://$ip:2376/containers/json
+    "https://$ip:2376/containers/json?all=1"
 }
 
 main() {
