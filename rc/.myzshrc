@@ -14,7 +14,7 @@ randword() {
   echo "$name-$qualifier"
 }
 
-denv() { eval $(MACHINE=n2 __docker_env.sh) }
+denv() { eval $(MACHINE=$1 __docker_env.sh) }
 
 source ~/.rc/._docker-machine
 source ~/.rc/.autocompletion
