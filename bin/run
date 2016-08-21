@@ -3,6 +3,12 @@
 # Maybe set /ops/machine as default MACHINE_STORAGE_PATH
 export MACHINE_STORAGE_PATH=${MACHINE_STORAGE_PATH:-/ops/machine}
 
+sourcenv () {
+  while read envfile; do
+    export $(cat $envfile | grep -v "^#" | xargs)
+  done < <(find . -name "*.env")
+}
+
 source_docker_env() {
   export ERROR=""
   eval $(__docker_env.sh)
@@ -13,9 +19,10 @@ source_docker_env() {
   fi
 }
 
+
 ascii_welcome() {
   QUIET=${QUIET:-"no"}
-  [[ "$QUIET" == "no" ]] && \
+  [[ "$QUIET" == "y" ]] && \
   echo '      _
    __| | ___  _ __  ___
   / _` |/ _ \| |_ \/ __|
@@ -27,8 +34,9 @@ ascii_welcome() {
 }
 
 main() {
-
   local arg="${@:-"zsh"}"
+
+  sourcenv
 
   case "$arg" in
     console)
@@ -38,7 +46,7 @@ main() {
             -e "s|x:changemeplease|$GOTTY_CREDENTIAL|" \
               /root/.gotty
         fi
-        exec gotty start zsh
+        exec gotty run zsh
       ;;
     zsh)
       ascii_welcome
