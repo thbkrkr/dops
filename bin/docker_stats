@@ -1,0 +1,64 @@
+#!/bin/bash -eu
+#
+# Get containers stats using the Docker Remote API
+#
+set -o pipefail
+
+api() {
+  local machine=$1 endpoint=$2 options=${3:-""}
+  declare ip=$(docker-machine ip $machine)
+  declare certs=$MACHINE_STORAGE_PATH/machines/$machine
+
+  curl -sk $options \
+    --cert $certs/cert.pem --key $certs/key.pem \
+    https://$ip:2376$endpoint
+}
+
+stats() {
+  local machine=$1
+  (
+    while read container; do
+      local container_id=$(jq -r .Id <<< $container)
+      echo '{
+        "container": '$container',
+        "stats": '$(api $machine "/containers/$container_id/stats?stream=false" "-q 2")'
+      }' &
+    done < <(api $machine /containers/json | jq -c '.[]' | sed "s|/||")
+    wait
+  ) \
+  | jq '{
+      name:.container.Names[0],
+      image:.container.Image,
+      mem_usage:.stats.memory_stats.usage,
+      mem_limit:.stats.memory_stats.limit,
+      cpu_usage:.stats.precpu_stats.cpu_usage.total_usage,
+      cpu_usage:.stats.precpu_stats.system_cpu_usage,
+      rx_bytes:.stats.networks.eth0.rx_bytes,
+      tx_bytes:.stats.networks.eth0.tx_bytes
+    }' \
+  | jq -s .
+}
+
+main() {
+  trap "rm -f .tmp.n*" 0 1 2 3 6 9 14 15
+
+  # Call each docker daemon in parallel
+  while read machine; do
+    #api $machine /containers/json
+    stats $machine > .tmp.$machine &
+  done < <(docker-machine ls -q)
+  wait
+
+
+  # Return a JSON object that aggregates all services from all machines
+  (
+    while read machine; do
+      echo '{
+        "'$machine'": '$(cat .tmp.$machine)'
+      }'
+    done < <(docker-machine ls -q)
+    wait
+  ) | jq -c -s add
+}
+
+main
