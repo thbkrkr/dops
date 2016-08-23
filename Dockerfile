@@ -20,21 +20,21 @@ RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linu
 
 # Install thbkrkr/dotfiles
 RUN git clone https://github.com/thbkrkr/dotfiles.git /root/.dotfiles && \
-    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout c73399b && \
+    git --git-dir=/root/.dotfiles/.git --work-tree=/root/.dotfiles checkout 6e504c1 && \
     cp /root/.dotfiles/resources/pure-thb.zsh-theme /root/.oh-my-zsh/themes/pure-thb.zsh-theme && \
     find /root/.dotfiles -type f -name ".[a-z]*" -exec cp {} /root \; && \
     sed -i "s|root:x:0:0:root:/root:/bin/ash|root:x:0:0:root:/root:/bin/zsh|" /etc/passwd
 
-RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/05f4eccddcc6c0c334149a1712d2220257a19ac2/doo \
+RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/56f433c54a98e2ce860f880a1251172ad40d6657/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
-
 
 COPY dict /usr/share/dict
 COPY bin /usr/local/bin
 COPY rc /root/.rc
 COPY rc/.myzshrc /root/.myzshrc
+
 COPY rc/gotty.config /root/.gotty
 
 WORKDIR /ops
