@@ -1,38 +1,55 @@
 #!/bin/bash -eu
 #
-# Deploy compose files.
+# Deploy services on nodes using compose files.
 #
-# ./deploy -i krkr/squid -f n2
+# One or more services can be targeted by filtering by image or by word.
+# Compose files are read from the compose/$DOCKER_MACHINE_NAME directories.
+#
+# Usage: deploy -i <image> -f <word>
 #
 
-list_compose_by_image() {
+list_compose_filter_by_image() {
   declare image=$1
   declare machine=$2
-  grep -r "$image" compose/$machine/*.yml | sed "s|:\s*.*||" | sort | uniq
+  grep -r "image:.*$image" compose/$machine/*.yml | sed "s|:\s*.*||" | sort | uniq
 }
 
-list_compose_by_filter() {
+list_compose_filter_by_word() {
   declare filter=$1
   declare machine=$2
   ls -1 compose/$machine/*.yml | grep "$filter"
 }
 
 main() {
-  local list_compose="list_compose_by_filter compose"
-  while getopts "f:i:d" arg; do
+  local image="" cmd="ps" list_compose="list_compose_by_filter compose"
+  while getopts "i:w:c:d" arg; do
     case $arg in
-      f) list_compose="list_compose_by_filter $OPTARG" && shift && shift ;;
-      i) list_compose="list_compose_by_image $OPTARG" && shift && shift ;;
+      w)
+        list_compose="list_compose_filter_by_word $OPTARG" && shift ;;
+      i)
+        list_compose="list_compose_filter_by_image $OPTARG" && shift ;;
+      c)
+        cmd=$OPTARG
+        ;;
     esac
   done
-  CMD="${@:-ps}"
 
+  # For each machines
   for m in $(docker-machine ls -q); do
     echo "> machine $m"
+    # Source docker env
     eval $(MACHINE=$m __docker_env.sh)
+
+    # For each compose
     for c in $($list_compose $m); do
-      doo dc $c $CMD
+      # Run docker-compose command
+      if [[ "$cmd" == "ls" ]]; then
+        echo $c
+      else
+        doo dc $c $cmd
+      fi
     done
+
   done
 
   wait
