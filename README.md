@@ -14,13 +14,13 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 #### Which versions?
 
     {"bash":"4.3.42"}
-    {"curl":"7.47.0"}
+    {"curl":"7.50.3"}
     {"jq":"1.5"}
-    {"docker":"1.10.0"}
-    {"docker-machine":"0.6.0"}
-    {"docker-compose":"1.6.0"}
-    {"ansible":"1.9.4"}
-    {"terraform":"0.6.10"}
+    {"docker":"1.12.2"}
+    {"docker-machine":"0.8.2"}
+    {"docker-compose":"1.8.1"}
+    {"ansible":"2.1.2.0"}
+    {"terraform":"0.7.7"}
 
 ### Using dops
 
