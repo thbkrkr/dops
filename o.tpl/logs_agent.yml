@@ -1,0 +1,14 @@
+version: '2'
+services:
+
+  logspout:
+    image: gliderlabs/logspout
+    container_name: o_logs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SYSLOG_STRUCTURED_DATA=- X-OVH-TOKEN="$OVH_LOGS_TOKEN"
+    ports:
+      - 8000:80
+    command: syslog+tls://$OVH_LOGS_URL
+    restart: always
