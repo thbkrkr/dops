@@ -36,6 +36,7 @@ COPY rc /root/.rc
 COPY rc/.myzshrc /root/.myzshrc
 
 COPY rc/gotty.config /root/.gotty
+COPY o.tpl /o/tpl
 
 WORKDIR /ops
 ENTRYPOINT ["run"]
