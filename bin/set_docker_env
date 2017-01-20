@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Set up Ansible, Docker Machine and Docker environment variables from
+# the environment variables CLUSTER and MACHINE.
+#
+# - MACHINE_STORAGE_PATH for Docker Machine depending CLUSTER
+# - Optionally Docker client env vars to call Docker engine API using https
+#  (DOCKER_MACHINE_NAME, DOCKER_HOST, DOCKER_TLS_VERIFY and DOCKER_CERT_PATH)
+#  only if MACHINE is set
+#
+
+_first_machine() {
+  docker-machine ls -q 2> /dev/null | head -1
+}
+
+main() {
+  if [[ ${MACHINE_STORAGE_PATH:-""} == "" ]]; then
+    export ERROR_ENV="Error: MACHINE_STORAGE_PATH is not defined"
+    return
+  fi
+
+  # Try to set up Docker client env if MACHINE or DOCKER_MACHINE_NAME is defined
+  # or by getting the first docker machine
+  local machine=${1:-${MACHINE:-${DOCKER_MACHINE_NAME:-$(_first_machine)}}}
+  if [[ "$machine" != "" ]]; then
+
+    # If machine exists (by getting its ip using docker-machine)
+    docker-machine ip $machine &> /dev/null
+    if [[ $? -eq 0 ]]; then
+      # Set up the Docker client env vars
+      echo "export MACHINE=$machine"
+      echo 'export DOCKER_TLS_VERIFY="1"'
+      echo 'export DOCKER_HOST="tcp://'$(docker-machine ip $machine)':2376"'
+      echo 'export DOCKER_CERT_PATH="'$MACHINE_STORAGE_PATH'/machines/'$machine'"'
+      echo 'export DOCKER_MACHINE_NAME="'$machine'"'
+    else
+      # Else reset Docker client env vars
+      echo "export MACHINE="
+      echo "export DOCKER_TLS_VERIFY="
+      echo "export DOCKER_HOST="
+      echo "export DOCKER_CERT_PATH="
+      echo "export DOCKER_MACHINE_NAME="
+    fi
+
+  fi
+}
+
+main "$@"

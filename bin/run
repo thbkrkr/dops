@@ -11,7 +11,7 @@ sourcenv () {
 
 source_docker_env() {
   export ERROR=""
-  eval $(__docker_env.sh)
+  eval $(set_docker_env)
   if [[ "$ERROR" != "" ]]; then
     echo
     echo "$ERROR"
