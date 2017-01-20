@@ -1,0 +1,145 @@
+#!/bin/bash -eu
+#
+# Encrypt and decrypt sensitives files using OpenSSL.
+#
+# - Files to encrypt need to be located with a minimum depth of 2.
+# - A password file is required (~/.ovh/secret if VAULT_SECRET_PATH is not defined).
+#
+# Usage: vault <path> <filter>
+#
+
+comment()   { sed 's|^|# |g'; }
+uncomment() { sed 's|^# ||g'; }
+
+encrypt_file() {
+    local decryptedFile=$1
+    local encryptedFile=$decryptedFile.encrypt
+
+    cat $decryptedFile | openssl aes-256-cbc -salt -a -k $PASSWORD | comment > $encryptedFile
+}
+
+decrypt_file() {
+    local encryptedFile=$1
+    local decryptedFile=$2
+
+    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD > $decryptedFile
+}
+
+list_files_to_encrypt() {
+    declare spath=$1
+    declare filter=$2
+    # Exclude some directories and files
+    find "$spath" -mindepth 1 \
+        ! -path "./.git/*" ! -path "./http-api/*" ! -name "*.encrypt" ! -name "*.temp" ! -name "\.DS_Store" \
+        -name "*$filter*" -type f
+}
+
+list_files_to_decrypt() {
+    declare spath=$1
+    declare filter=$2
+    # Exclude .git and search by name
+    find "$spath" -mindepth 1 \
+        ! -path "./.git/*" -name "*.encrypt" \
+        -name "*$filter*" -type f
+}
+
+progress_bar() {
+    declare i=$1
+    declare total=$2
+    [[ $total -eq 0 ]] && total=10000000 || true
+
+    local progress=$(($i*100/$total))
+    local _done=$((${progress}*4/10))
+    local left=$((40-$_done))
+    fill=$(printf "%${_done}s")
+    empty=$(printf "%${left}s")
+    printf "\r[${fill// /#}${empty// /-}] ${progress}%%"
+}
+
+maybe_encrypt_file() {
+    local decryptedFile=$1
+    # Encrypt only if file changed
+    declare sha1="notYetEncrypted"
+    if [[ -f $decryptedFile.encrypt ]]; then
+        decrypt_file $decryptedFile.encrypt $decryptedFile.temp
+        sha1=$(sha1sum $decryptedFile.temp | cut -d ' ' -f1)
+    fi
+    sha2=$(sha1sum $decryptedFile | cut -d ' ' -f1)
+    if [[ "$sha1" != "$sha2" ]]; then
+        echo
+        echo "Encrypt $decryptedFile..."
+        encrypt_file $decryptedFile
+    fi
+    rm -f $decryptedFile.temp $decryptedFile
+}
+
+encrypt() {
+    declare path=$1
+    declare filter=$2
+    local i=1
+    for decryptedFile in $(list_files_to_encrypt "$path" "$filter")
+    do
+        maybe_encrypt_file $decryptedFile &
+
+        i=$(expr $i + 1)
+        [[ $(($i % 50)) -eq 0 ]] && wait
+        progress_bar $i $TOTAL_SECRETS
+    done
+}
+
+maybe_decrypt_file() {
+    local encryptedFile=$1
+
+    declare decryptedFile=${encryptedFile%.*}
+    decrypt_file $encryptedFile $decryptedFile
+    chmod 600 $decryptedFile
+}
+
+decrypt() {
+    declare path=$1
+    declare filter=$2
+    local i=1
+    for encryptedFile in $(list_files_to_decrypt "$path" "$filter")
+    do
+        maybe_decrypt_file $encryptedFile &
+
+        i=$(expr $i + 1)
+        #progress_bar $i $TOTAL_SECRETS
+        [[ $(($i % 50)) -eq 0 ]] && wait
+    done
+    wait
+}
+
+main() {
+    declare cmd=$1
+    declare path=${2:-"."}
+    declare filter=${3:-"*"}
+    declare startTime=$(date +%s)
+
+    if [[ "${VAULT_KEY:-}" != "" ]]; then
+        PASSWORD=$VAULT_KEY
+    else
+        SECRET=${VAULT_SECRET_PATH:-~/.ovh/secret}
+        [ ! -f $SECRET ] && echo "Error: cannot encrypt without secret public key" && exit 1
+
+        PASSWORD=$(cat $SECRET)
+    fi
+
+    TOTAL_SECRETS=$(list_files_to_decrypt "$path" "$filter" | wc -l)
+
+    case $cmd in
+        encrypt ) encrypt "$path" "$filter" ;;
+        decrypt ) decrypt "$path" "$filter" ;;
+        ls:e*   ) list_files_to_encrypt "$path" "$filter" ;;
+        ls:d*   ) list_files_to_decrypt "$path" "$filter" ;;
+    esac
+
+    declare endTime=$(date +%s)
+    declare duration=$(($endTime - $startTime))
+    if [[ $duration -gt 1 ]]; then
+        echo "[OK] $TOTAL_SECRETS secrets decrypted in ${duration}s"
+    fi
+}
+
+
+main "$@"
