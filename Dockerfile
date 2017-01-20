@@ -3,6 +3,9 @@
 ##}
 FROM krkr/dops-base
 
+# bin/vault dependency
+RUN apk add --no-cache openssl
+
 # Install git, zsh, make, oh-my-zsh, vim config and go-apish
 RUN apk --update add bash git zsh make jq && \
     rm -f /var/cache/apk/* && \
@@ -30,6 +33,8 @@ RUN curl -s https://raw.githubusercontent.com/thbkrkr/doo/56f433c54a98e2ce860f88
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons
 
+RUN sed -i "s/^\(\s*vcs_info\)$/#\1/" ~/.oh-my-zsh/themes/pure-thb.zsh-theme
+
 COPY dict /usr/share/dict
 COPY bin /usr/local/bin
 COPY rc /root/.rc
@@ -37,6 +42,7 @@ COPY rc/.myzshrc /root/.myzshrc
 
 COPY rc/gotty.config /root/.gotty
 COPY o.tpl /o/tpl
+COPY playbooks /ops/playbooks
 
 WORKDIR /ops
 ENTRYPOINT ["run"]
