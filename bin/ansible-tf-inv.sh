@@ -20,8 +20,8 @@ hosts() {
     .primary.attributes' $MACHINE_STORAGE_PATH/terraform.tfstate
 }
 
-groups() {
-  hosts | jq -s 'map(.["metadata.group"])[] | split(",") | .[]' | jq -s '. | unique' | jq -r .[]
+list_groups() {
+  hosts | jq -r '.["metadata.groups"] | split(",") | unique[]'
 }
 
 main() {
@@ -35,11 +35,11 @@ main() {
     echo '"all" : '$all''
     comma=,
 
-    for group in $(groups)
+    for group in $(list_groups)
     do
       echo $comma
       echo '"'$group'":'
-      hosts | jq 'select(.["metadata.group"] | split(",") | .[] | . == "'$group'") .name' | jq -s .
+      hosts | jq 'select(.["metadata.groups"] | split(",")[] == "'$group'") .name' | jq -s .
     done
     echo '}'
     ;;
