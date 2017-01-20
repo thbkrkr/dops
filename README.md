@@ -13,38 +13,40 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 
 #### Which versions?
 
-    {"bash":"4.3.42"}
-    {"curl":"7.50.3"}
-    {"jq":"1.5"}
-    {"docker":"1.12.2"}
-    {"docker-machine":"0.8.2"}
-    {"docker-compose":"1.8.1"}
-    {"ansible":"2.1.2.0"}
-    {"terraform":"0.7.7"}
+```
+{"bash":"4.3.46"}
+{"curl":"7.52.1"}
+{"jq":"1.5"}
+{"docker":"1.13.0"}
+{"docker-machine":"0.9.0"}
+{"docker-compose":"1.10.0"}
+{"ansible":"2.2.1.0"}
+{"terraform":"0.8.4"}
+```
 
 ### Using dops
 
 #### zsh in dops
 
-    ~/dev/docker/dops master **  thb@io
-    > m go
-    docker run --rm -ti \
-            -v $(pwd):/ops \
-            -e MACHINE_STORAGE_PATH=/ops/machines \
-            krkr/dops:latest
-          _
-       __| | ___  _ __  ___
-      / _` |/ _ \| |_ \/ __|
-     | (°| < (#) < |_) \__ \
-      \__,_|\___/| .__/|___/
-                 |_|
-     -----------------------
-     Welcome in dops!
+```
+> docker run --rm -ti \
+  -v $(pwd):/ops \
+  -e MACHINE_STORAGE_PATH=/ops/machines \
+  krkr/dops:latest
+  _
+   __| | ___  _ __  ___
+  / _` |/ _ \| |_ \/ __|
+ | (°| < (#) < |_) \__ \
+  \__,_|\___/| .__/|___/
+             |_|
+ -----------------------
+ Welcome in dops!
 
-    No docker MACHINE defined. No docker environment set!
+No docker MACHINE defined. No docker environment set!
 
-    /ops master **  [cluster:machines]  root@494f4847e993 [indocker]
-    > ...
+/ops  [cluster:machine] [node:n1] root@io
+> ...
+```
 
 #### Create a VM on [OVH Cloud](https://www.ovh.com/fr/vps/vps-ssd.xml)
 
