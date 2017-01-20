@@ -35,3 +35,10 @@ if [[ -f /ops/machine/secrets.env ]]; then
   export $(cat /ops/machine/secrets.env | grep -v '^#' | xargs)
 fi
 
+eachmachine() {
+  for m in $(docker-machine ls -q); do
+    >&2 echo "> machine $m..."
+    dme $m
+    $@
+  done
+}
