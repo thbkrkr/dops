@@ -1,0 +1,34 @@
+# Autocomplete aliases functions
+
+# dme/denv aliases with docker machines
+
+__list_machines() {
+  docker-machine ls -q
+}
+
+_list_machines() {
+  while read m
+  do
+    compadd "$m"
+  done < <(__list_machines)
+  return 0
+}
+
+compdef _list_machines denv
+compdef _list_machines dme
+
+# ansible playbooks
+
+__list_playbooks() {
+  find /ops/ansible -name "*.yml" | sed -e "s|/ops/ansible/||g" -e "s|.yml||g"
+}
+
+_list_playbooks() {
+  while read m
+  do
+    compadd "$m"
+  done < <(__list_playbooks)
+  return 0
+}
+
+compdef _list_playbooks play

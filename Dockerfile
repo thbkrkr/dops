@@ -17,7 +17,7 @@ RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linu
         | sh -s 19fffee
 
 COPY dict /usr/share/dict
-COPY rc /root/.rc
+COPY rc /root
 COPY bin /usr/local/bin
 COPY o.tpl /o/tpl
 COPY playbooks /ops/playbooks

@@ -16,8 +16,8 @@ randword() {
 
 denv() { eval $(MACHINE=$1 set_docker_env) }
 
-source ~/.rc/._docker-machine
-source ~/.rc/.autocompletion
+source ~/._docker-machine
+source ~/._autocompletion
 
 # Automatically set all bin/ directories in the PATH
 list_bin_paths() {
@@ -57,3 +57,7 @@ dmlog () {
   docker-machine ssh $DOCKER_MACHINE_NAME sudo tail -f /var/log/syslog | grep "${1:- }"
 }
 
+play() {
+  declare name=$1 && shift
+  ansible-playbook /ops/ansible/$name.yml $@
+}
