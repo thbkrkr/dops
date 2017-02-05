@@ -10,5 +10,5 @@ services:
       - SYSLOG_STRUCTURED_DATA=- X-OVH-TOKEN="$OVH_LOGS_TOKEN"
     ports:
       - 8000:80
-    command: syslog+tls://$OVH_LOGS_URL
+    command: syslog+tls://$OVH_LOGS_ENDPOINT
     restart: always
