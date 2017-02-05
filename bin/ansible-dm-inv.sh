@@ -1,44 +1,40 @@
 #!/bin/bash -eu
 #
-# Ansible dynamic inventory based on `docker-machine ls`.
+# Ansible dynamic inventory based on $(docker-machine ls).
 #
 
-list::machines() {
-    docker-machine ls -q
-}
+ANSIBLE_SSH_USER=${ANSIBLE_SSH_USER:-admin}
 
 main() {
-    local action=$1
-    local host=${2:-}
+    declare action=${1:-}
 
     case $action in
     --list)
-        
-        comma1=
-        echo '['
-            while read machine
-            do
-                echo $comma1'"'$machine'"'
-                comma1=,
-            done < <(list::machines)
-        echo ']'
-        ;;
-
+        echo '{
+            "all": {
+                "hosts":
+                    '$(docker-machine ls -q | sed -r 's|(.*)|"\1"|g' | jq -sM .)',
+                "vars": {
+                }
+            }
+        }'
+    ;;
     --host)
-        [ ! -d $MACHINES_DIR/$host ] && \
-            echo "error: host unknown." && exit 1
-        
-        ip=$($DM ip $host)
-        key_file="$MACHINES_DIR/$host/id_rsa"
+        declare host=${2:-""}
+        declare machine_dir=$MACHINE_STORAGE_PATH/machines/$host
+
+        [ ! -d $machine_dir ] && echo "error: host unknown." && exit 1
+
         echo '{
             "host": "'$host'",
-            "ansible_ssh_user": "admin",
-            "ansible_ssh_host": "'$ip'",
-            "ansible_ssh_private_key_file": "'$key_file'"
-        }'
-        ;;
+            "ansible_ssh_user": "'$(jq -r .Driver.SSHUser $machine_dir/config.json)'",
+            "ansible_ssh_host": "'$(docker-machine ip $host)'",
+            "ansible_ssh_private_key_file": "'$machine_dir/id_rsa'"
+        }' | jq -M .
+    ;;
     *)
         echo "error: action unknown. Use --list or --host <host>." && exit 1
+    ;;
     esac
 }
 
