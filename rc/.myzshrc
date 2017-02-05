@@ -42,3 +42,18 @@ eachmachine() {
     $@
   done
 }
+
+rcmd () {
+  declare cmd_args="$@"
+  docker-machine ssh $DOCKER_MACHINE_NAME $cmd_args
+}
+
+rcmds () {
+  declare cmd_args="$@"
+  ansible all -sa 'sh -c "'$cmd_args'"'
+}
+
+dmlog () {
+  docker-machine ssh $DOCKER_MACHINE_NAME sudo tail -f /var/log/syslog | grep "${1:- }"
+}
+
