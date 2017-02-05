@@ -4,7 +4,8 @@
 FROM krkr/docker-toolbox
 
 # Install Ansible
-ENV ANSIBLE_VERSION 2.2.1.0
+ENV ANSIBLE_VERSION=2.2.1.0 \
+    ANSIBLE_HOST_KEY_CHECKING=False
 RUN apk --update add build-base python-dev libffi-dev \
     openssl-dev py2-pip py-crypto py-yaml py-jinja2 openssh-client && \
     pip install ansible==${ANSIBLE_VERSION} && \
