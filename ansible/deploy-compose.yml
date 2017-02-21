@@ -1,0 +1,10 @@
+#
+# Deploy compose files
+#
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+
+  roles:
+    - { name: compose, compose_name: {{ inventory_name }}

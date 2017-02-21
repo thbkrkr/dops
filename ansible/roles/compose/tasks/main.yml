@@ -1,0 +1,64 @@
+---
+
+- name: Creates **{{ compose_name }}** docker compose directory
+  file:
+    path={{ item }} state=directory
+    owner={{ user }} group={{ user }} mode=0755
+  with_items:
+    - "{{ user_home }}/compose"
+    - "{{ user_home }}/compose/{{ compose_name }}"
+  tags: ["compose", "create-compose-dir"]
+
+- name: Copy **{{ compose_name }}** docker compose file
+  template:
+    src=docker-compose/{{ compose_name }}/docker-compose.yml.j2
+    dest={{ user_home }}/compose/{{ compose_name }}/docker-compose.yml
+    owner={{ user }} group={{ user }} mode=0664
+    backup=true
+  register: copy_compose_file
+  tags: ["compose", "docker-pull", "docker-run"]
+
+- name: Copy **{{ compose_name }}** docker compose debug file
+  template:
+    src=docker-compose/{{ compose_name }}/docker-compose.yml.j2
+    dest={{ user_home }}/compose/{{ compose_name }}/docker-compose.yml.debug
+    owner={{ user }} group={{ user }} mode=0664
+  # Do not this task if the regular docker-compose.yml copy is done
+  when: copy_compose_file is not defined
+  tags: ["debug-compose"]
+
+# - name: Check if **{{ compose_name }}** sauna checks file exists
+#   local_action: stat path="docker-compose/{{ compose_name }}/sauna-checks.yml.j2"
+#   register: sauna_checks_file
+#   tags: ["compose", "sauna"]
+
+# - name: Copy **{{ compose_name }}** sauna checks file
+#   template:
+#     src=docker-compose/{{ compose_name }}/sauna-checks.yml.j2
+#     dest={{ user_home }}/compose/{{ compose_name }}/sauna-checks.yml
+#     owner={{ user }} group={{ user }} mode=0664
+#     backup=true
+#   when: sauna_checks_file.stat.exists
+#   notify: restart sauna
+#   tags: ["compose", "sauna"]
+
+- name: Pull **{{ compose_name }}** docker images
+  command: "docker-compose -f {{ user_home }}/compose/{{ compose_name }}/docker-compose.yml pull"
+  register: compose_pull
+  failed_when: "'not found' in compose_pull.stderr"
+  changed_when: "'Downloaded newer' in compose_pull.stdout"
+  tags: ["compose", "docker-pull"]
+
+- name: Run **{{ compose_name }}** docker containers
+  command: "docker-compose -f {{ user_home }}/compose/{{ compose_name }}/docker-compose.yml up -d"
+  register: compose_run
+  when: skip_docker_run is not defined
+  changed_when: "
+    'Recreating' in compose_run.stderr
+    or 'Creating' in compose_run.stderr
+    or 'Starting' in compose_run.stderr "
+  tags: ["compose", "docker-run"]
+
+- name: Sleep a little
+  pause: seconds=10
+  when: compose_run is defined and compose_run|changed and sleep == true

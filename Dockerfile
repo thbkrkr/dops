@@ -20,7 +20,7 @@ COPY dict /usr/share/dict
 COPY rc /root
 COPY bin /usr/local/bin
 COPY o.tpl /o/tpl
-COPY playbooks /ops/playbooks
+COPY ansible /ansible
 
 WORKDIR /ops
 ENTRYPOINT ["run"]
