@@ -35,12 +35,14 @@ main() {
     echo '"all" : '$all''
     comma=,
 
-    for group in $(list_groups)
-    do
-      echo $comma
-      echo '"'$group'":'
-      hosts | jq 'select(.["metadata.groups"] | split(",")[] == "'$group'") .name' | jq -s .
-    done
+    if [[ "$(hosts | jq -M .metadata)" != "null" ]]; then
+      for group in $(list_groups)
+      do
+        echo $comma
+        echo '"'$group'":'
+        hosts | jq 'select(.["metadata.groups"] | split(",")[] == "'$group'") .name' | jq -s .
+      done
+    fi
     echo '}'
     ;;
 

@@ -1,0 +1,6 @@
+
+# - name: restart sauna
+#   command:
+#     docker-compose
+#       -f {{ user_home }}/compose/sauna/docker-compose.yml
+#       up -d --force-recreate"

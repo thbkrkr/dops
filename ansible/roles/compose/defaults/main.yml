@@ -1,0 +1,7 @@
+---
+
+# By default, ansible_ssh_user is the user used
+user: "{{ ansible_ssh_user }}"
+user_home: "/home/{{ user }}"
+
+sleep: false
