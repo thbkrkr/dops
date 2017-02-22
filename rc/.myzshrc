@@ -4,6 +4,8 @@
 
 # Aliases
 
+alias tf='terraform-wrapper'
+
 dmssh() {
   docker-machine ssh $DOCKER_MACHINE_NAME
 }
