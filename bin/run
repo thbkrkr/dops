@@ -19,6 +19,11 @@ source_docker_env() {
   fi
 }
 
+decrypt() {
+  [[ -d "secrets" ]] && vault decrypt "secrets"
+  [[ -d "env" ]]     && vault decrypt "envfile"
+  [[ -d "machine" ]] && vault decrypt "machine"
+}
 
 ascii_welcome() {
   QUIET=${QUIET:-"no"}
@@ -36,6 +41,8 @@ ascii_welcome() {
 main() {
   local arg="${@:-"zsh"}"
 
+  decrypt
+
   sourcenv
 
   case "$arg" in
@@ -46,6 +53,7 @@ main() {
             -e "s|x:changemeplease|$GOTTY_CREDENTIAL|" \
               /root/.gotty
         fi
+        source_docker_env
         exec gotty run zsh
       ;;
     zsh)

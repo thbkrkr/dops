@@ -83,7 +83,7 @@ encrypt() {
 
         i=$(expr $i + 1)
         [[ $(($i % 50)) -eq 0 ]] && wait
-        progress_bar $i $TOTAL_SECRETS
+        #progress_bar $i $TOTAL_SECRETS
     done
 }
 
