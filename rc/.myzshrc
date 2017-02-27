@@ -63,3 +63,26 @@ play() {
   declare name=$1 && shift
   ansible-playbook /ops/ansible/$name.yml $@
 }
+
+vault:encrypt() {
+  if [[ -d "env" ]]; then
+    vault encrypt "env" "secrets"
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
+  fi
+  if [[ -d "machine" ]]; then
+    vault encrypt "machine"
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R machine
+  fi
+}
+
+vault:decrypt() {
+  if [[ -d "env" ]]; then
+    vault decrypt "env" "secrets"
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
+  fi
+  if [[ -d "machine" ]]; then
+    vault decrypt "machine"
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R machine
+  fi
+}
+
