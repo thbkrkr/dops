@@ -20,8 +20,7 @@ source_docker_env() {
 }
 
 decrypt() {
-  [[ -d "secrets" ]] && vault decrypt "secrets"
-  [[ -d "env" ]]     && vault decrypt "envfile"
+  [[ -d "env" ]]     && vault decrypt "env" "secrets"
   [[ -d "machine" ]] && vault decrypt "machine"
 }
 
