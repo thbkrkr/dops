@@ -66,23 +66,17 @@ play() {
 
 vault:encrypt() {
   if [[ -d "env" ]]; then
-    vault encrypt "env" "secrets"
+    vault encrypt . secrets
     [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
   fi
   if [[ -d "machine" ]]; then
-    vault encrypt "machine"
+    vault encrypt "machine" .pem
+    vault encrypt "machine" .id_rsa
     [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R machine
   fi
 }
 
 vault:decrypt() {
-  if [[ -d "env" ]]; then
-    vault decrypt "env" "secrets"
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
-  fi
-  if [[ -d "machine" ]]; then
-    vault decrypt "machine"
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R machine
-  fi
+  vault decrypt . encrypt
 }
 

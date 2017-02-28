@@ -16,6 +16,7 @@ encrypt_file() {
     local encryptedFile=$decryptedFile.encrypt
 
     cat $decryptedFile | openssl aes-256-cbc -salt -a -k $PASSWORD | comment > $encryptedFile
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $encryptedFile || true
 }
 
 decrypt_file() {
@@ -23,6 +24,7 @@ decrypt_file() {
     local decryptedFile=$2
 
     cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD > $decryptedFile
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $decryptedFile || true
 }
 
 list_files_to_encrypt() {
@@ -82,9 +84,10 @@ encrypt() {
         maybe_encrypt_file $decryptedFile &
 
         i=$(expr $i + 1)
-        [[ $(($i % 50)) -eq 0 ]] && wait
+        [[ $(($i % 50)) -eq 0 ]] && wait || true
         #progress_bar $i $TOTAL_SECRETS
     done
+    wait
 }
 
 maybe_decrypt_file() {
@@ -105,7 +108,7 @@ decrypt() {
 
         i=$(expr $i + 1)
         #progress_bar $i $TOTAL_SECRETS
-        [[ $(($i % 50)) -eq 0 ]] && wait
+        [[ $(($i % 50)) -eq 0 ]] && wait || true
     done
     wait
 }
@@ -125,7 +128,7 @@ main() {
         PASSWORD=$(cat $SECRET)
     fi
 
-    TOTAL_SECRETS=$(list_files_to_decrypt "$path" "$filter" | wc -l)
+    #TOTAL_SECRETS=$(list_files_to_decrypt "$path" "$filter" | wc -l)
 
     case $cmd in
         encrypt ) encrypt "$path" "$filter" ;;
@@ -134,11 +137,11 @@ main() {
         ls:d*   ) list_files_to_decrypt "$path" "$filter" ;;
     esac
 
-    declare endTime=$(date +%s)
-    declare duration=$(($endTime - $startTime))
-    if [[ $duration -gt 1 ]]; then
-        echo "[OK] $TOTAL_SECRETS secrets decrypted in ${duration}s"
-    fi
+    #declare endTime=$(date +%s)
+    #declare duration=$(($endTime - $startTime))
+    #if [[ $duration -gt 1 ]]; then
+        #echo "[OK] $TOTAL_SECRETS secrets decrypted in ${duration}s"
+    #fi
 }
 
 
