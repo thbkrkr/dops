@@ -19,11 +19,6 @@ source_docker_env() {
   fi
 }
 
-decrypt() {
-  [[ -d "env" ]]     && vault decrypt "env" "secrets"
-  [[ -d "machine" ]] && vault decrypt "machine"
-}
-
 ascii_welcome() {
   QUIET=${QUIET:-"no"}
   [[ "$QUIET" == "y" ]] && \
@@ -40,7 +35,8 @@ ascii_welcome() {
 main() {
   local arg="${@:-"zsh"}"
 
-  decrypt
+  vault decrypt /ops  encrypt
+  vault decrypt /root encrypt
 
   sourcenv
 
