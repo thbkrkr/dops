@@ -12,7 +12,7 @@ RUN apk --update add build-base python-dev libffi-dev \
     apk del build-base python-dev openssl-dev libffi-dev
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.8.7
+ENV TERRAFORM_VERSION 0.9.1
 RUN apk --update add ca-certificates && \
     curl -sSkL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" > /terraform.zip && \
     unzip /terraform.zip && rm /terraform.zip && \
