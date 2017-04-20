@@ -84,3 +84,7 @@ sshkeygen() {
   declare name=$1
   ssh-keygen -t rsa -b 4096 -i -f $(pwd)/$name
 }
+
+ansible-install-python() {
+  ansible all -m raw -sa "apt-get update && apt-get -y install python"
+}
