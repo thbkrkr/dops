@@ -35,7 +35,7 @@ main() {
     echo '"all" : '$all''
     comma=,
 
-    if [[ "$(hosts | jq -M .metadata)" != "null" ]]; then
+    if [[ "$(hosts | jq -M .metadata | uniq)" != "null" ]]; then
       for group in $(list_groups)
       do
         echo $comma
