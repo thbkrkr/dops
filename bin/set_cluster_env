@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Set up the cluster specific environment variables.
+#
+
+main() {
+  while read envfile; do
+    echo export $(cat $envfile | grep -v "^#" | xargs)
+  done < <(find /ops/machine/$CLUSTER -name "*.env")
+
+  echo "export MACHINE_STORAGE_PATH=/ops/machine/$CLUSTER"
+}
+
+main

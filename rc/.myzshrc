@@ -88,3 +88,45 @@ sshkeygen() {
 ansible-install-python() {
   ansible all -m raw -sa "apt-get update && apt-get -y install python"
 }
+
+###
+# Switch cluster
+
+cluster() {
+  # Update CLUSTER env var
+  declare clusterName=${1:-""}
+  if [[ "$clusterName" == "" ]]; then
+    echo 2> "Warn: CLUSTER not set"
+    return
+  fi
+  export CLUSTER=$clusterName
+
+  # Refreshing cluster env vars
+  eval $(set_cluster_env)
+
+  # Reset machine env vars if set
+  if [[ ! -z $MACHINE ]] || [[ ! -z $DOCKER_MACHINE_NAME ]]; then
+    export DOCKER_MACHINE_NAME=
+    export DOCKER_HOST=
+    export MACHINE=
+  fi
+
+  # Refreshing docker machine env vars
+  eval $(set_docker_env)
+}
+
+__list_clusters() {
+  ls -1 /ops/machine | grep -v "^ssh$"
+}
+
+__autocomplete_clusters() {
+  while read m
+  do
+    compadd "$m"
+  done < <(__list_clusters)
+  return 0
+}
+
+compdef __autocomplete_clusters cluster
+
+alias cl='cluster'

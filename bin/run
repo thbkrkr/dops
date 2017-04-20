@@ -1,20 +1,21 @@
 #!/bin/bash -u
 
-# Maybe set /ops/machine as default MACHINE_STORAGE_PATH
-export MACHINE_STORAGE_PATH=${MACHINE_STORAGE_PATH:-/ops/machine}
-
 sourcenv () {
   while read envfile; do
     export $(cat $envfile | grep -v "^#" | xargs)
-  done < <(find . -name "*.env")
+  done < <(find /ops/env -name "*.env")
+}
+
+source_cluster_env() {
+  eval $(set_cluster_env)
 }
 
 source_docker_env() {
-  export ERROR=""
+  export ERROR_ENV=""
   eval $(set_docker_env)
-  if [[ "$ERROR" != "" ]]; then
+  if [[ "$ERROR_ENV" != "" ]]; then
     echo
-    echo "$ERROR"
+    echo "$ERROR_ENV"
     echo
   fi
 }
@@ -40,6 +41,11 @@ main() {
 
   sourcenv
 
+  if [[ "${CLUSTER:-}" != "" ]]; then
+    source_cluster_env
+    source_docker_env
+  fi
+
   case "$arg" in
     console)
         if [[ ! -z $GOTTY_CREDENTIAL ]]; then
@@ -48,16 +54,13 @@ main() {
             -e "s|x:changemeplease|$GOTTY_CREDENTIAL|" \
               /root/.gotty
         fi
-        source_docker_env
         exec gotty run zsh
       ;;
     zsh)
       ascii_welcome
-      source_docker_env
       exec zsh
       ;;
     *)
-      source_docker_env
       exec "$@"
     ;;
   esac
