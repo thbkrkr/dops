@@ -4,8 +4,8 @@
 
 TF_STATE=$MACHINE_STORAGE_PATH/terraform.tfstate
 
-SSH_USER="${SSH_USER:-admin}"
-SSH_PRIVATE_KEY_FILE="${SSH_PRIVATE_KEY_FILE:-/ops/ssh/admin.id_rsa}"
+SSH_USER="${SSH_USER:-ubuntu}"
+SSH_PRIVATE_KEY_FILE="${SSH_PRIVATE_KEY_FILE:-/ops/machine/ssh/admin.$CLUSTER.id_rsa}"
 
 provider="openstack"
 type_key="openstack_compute_instance_v2"
