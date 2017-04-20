@@ -80,3 +80,7 @@ vault:decrypt() {
   vault decrypt . encrypt
 }
 
+sshkeygen() {
+  declare name=$1
+  ssh-keygen -t rsa -b 4096 -i -f $(pwd)/$name
+}
