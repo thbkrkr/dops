@@ -4,7 +4,7 @@
 FROM krkr/dops-base
 
 RUN apk --update add \
-    openssl bash git zsh zsh-vcs make jq
+    openssl bash git zsh zsh-vcs make jq gettext
 
 # gotty, doo, ons, dotfiles
 RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
