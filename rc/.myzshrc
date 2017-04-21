@@ -106,9 +106,7 @@ cluster() {
 
   # Reset machine env vars if set
   if [[ ! -z $MACHINE ]] || [[ ! -z $DOCKER_MACHINE_NAME ]]; then
-    export DOCKER_MACHINE_NAME=
-    export DOCKER_HOST=
-    export MACHINE=
+    eval $(set_docker_env '!reset')
   fi
 
   # Refreshing docker machine env vars

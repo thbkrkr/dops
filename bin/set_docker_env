@@ -25,18 +25,20 @@ main() {
   if [[ "$machine" != "" ]]; then
 
     # If machine exists (by getting its ip using docker-machine)
-    docker-machine ip $machine &> /dev/null
-    if [[ $? -eq 0 ]]; then
+    IP=$(docker-machine ip $machine 2> /dev/null)
+    if [[ "$IP" != "" ]]; then
       # Set up the Docker client env vars
       echo "export MACHINE=$machine"
       echo 'export DOCKER_TLS_VERIFY="1"'
-      echo 'export DOCKER_HOST="tcp://'$(docker-machine ip $machine)':2376"'
+      echo 'export DOCKER_MACHINE_IP='$IP
+      echo 'export DOCKER_HOST="tcp://'$IP':2376"'
       echo 'export DOCKER_CERT_PATH="'$MACHINE_STORAGE_PATH'/machines/'$machine'"'
       echo 'export DOCKER_MACHINE_NAME="'$machine'"'
     else
       # Else reset Docker client env vars
       echo "export MACHINE="
       echo "export DOCKER_TLS_VERIFY="
+      echo "export DOCKER_MACHINE_IP="
       echo "export DOCKER_HOST="
       echo "export DOCKER_CERT_PATH="
       echo "export DOCKER_MACHINE_NAME="
