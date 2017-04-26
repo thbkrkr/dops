@@ -1,4 +1,5 @@
-NAME = krkr/dops
+NAME := krkr/dops
+SHA1 := $(shell git rev-parse --short HEAD)
 
 build: build-base-image build-image
 
@@ -7,6 +8,12 @@ build-base-image:
 
 build-image:
 	@doo b
+
+tag:
+	docker tag $(NAME) $(NAME):$(SHA1)
+
+push:
+	docker push $(NAME):$(SHA1)
 
 versions:
 	@docker run --rm -e VAULT_KEY=x $(NAME):latest whichversion bash
