@@ -32,11 +32,6 @@ list_bin_paths() {
 
 export PATH=$PATH:$(list_bin_paths)
 
-# Source secrets.env if present
-if [[ -f /ops/machine/secrets.env ]]; then
-  export $(cat /ops/machine/secrets.env | grep -v '^#' | xargs)
-fi
-
 eachmachine() {
   for m in $(docker-machine ls -q); do
     >&2 echo "> machine $m..."
@@ -114,7 +109,7 @@ cluster() {
 }
 
 __list_clusters() {
-  ls -1 /ops/machine | grep -v "^ssh$"
+  ls -1 /ops/clusters | grep -v "^ssh$"
 }
 
 __autocomplete_clusters() {

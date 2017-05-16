@@ -31,7 +31,7 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 ```
 > docker run --rm -ti \
   -v $(pwd):/ops \
-  -e MACHINE_STORAGE_PATH=/ops/machines \
+  -e MACHINE_STORAGE_PATH=/ops/clusters \
   krkr/dops:latest
   _
    __| | ___  _ __  ___
@@ -64,8 +64,8 @@ Create a VM using docker-machine and the [OVH driver](https://github.com/yadutaf
 
     > docker run --rm -ti \
       -v $(pwd):/ops \
-      --env-file $(pwd)/machine/os-api-creds.env \
-      -e MACHINE_STORAGE_PATH=/ops/machine \
+      --env-file $(pwd)/env/openstack.secrets.env \
+      -e MACHINE_STORAGE_PATH=/ops/clusters \
       krkr/dops \
         docker-machine create -d ovh node-1
 
@@ -87,7 +87,7 @@ Write [inventory](https://github.com/thbkrkr/swarm-up/blob/master/ansible/invent
       -v $(pwd):/ops \
       -w ansible \
       krkr/dops \
-        ansible -i inventory/bim playbooks/all.yml -t docker
+        ansible ansible/all.yml -t docker
 
 ## License
 

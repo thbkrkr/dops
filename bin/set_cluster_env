@@ -6,9 +6,9 @@
 main() {
   while read envfile; do
     echo export $(cat $envfile | grep -v "^#" | xargs)
-  done < <(find /ops/machine/$CLUSTER -name "*.env")
+  done < <(find /ops/clusters/$CLUSTER -name "*.env")
 
-  echo "export MACHINE_STORAGE_PATH=/ops/machine/$CLUSTER"
+  echo "export MACHINE_STORAGE_PATH=/ops/clusters/$CLUSTER"
 }
 
 main
