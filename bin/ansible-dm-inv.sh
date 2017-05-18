@@ -3,7 +3,7 @@
 # Ansible dynamic inventory based on $(docker-machine ls).
 #
 
-ANSIBLE_SSH_USER=${ANSIBLE_SSH_USER:-admin}
+ANSIBLE_USER=${ANSIBLE_USER:-ubuntu}
 
 main() {
     declare action=${1:-}
@@ -27,9 +27,9 @@ main() {
 
         echo '{
             "host": "'$host'",
-            "ansible_ssh_user": "'$(jq -r .Driver.SSHUser $machine_dir/config.json)'",
-            "ansible_ssh_host": "'$(docker-machine ip $host)'",
-            "ansible_ssh_private_key_file": "'$machine_dir/id_rsa'"
+            "ansible_user": "'$(jq -r .Driver.SSHUser $machine_dir/config.json)'",
+            "ansible_host": "'$(docker-machine ip $host)'",
+            "ansible_private_key_file": "'$machine_dir/id_rsa'"
         }' | jq -M .
     ;;
     *)

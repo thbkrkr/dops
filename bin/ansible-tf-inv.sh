@@ -50,9 +50,9 @@ main() {
     data=$(hosts | jq 'select(.name == "'$host'")')
     ip=$( echo $data | jq '.["'$ip_key'"]')
     ansible='{
-      "ansible_ssh_user": "'$SSH_USER'",
-      "ansible_ssh_host": '$ip',
-      "ansible_ssh_private_key_file": "'$SSH_PRIVATE_KEY_FILE'"
+      "ansible_user": "'$SSH_USER'",
+      "ansible_host": '$ip',
+      "ansible_private_key_file": "'$SSH_PRIVATE_KEY_FILE'"
     }'
     echo "$data$ansible" | jq -s '.[0] * .[1]'
     ;;
