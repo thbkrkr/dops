@@ -14,7 +14,7 @@ RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linu
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons && \
     curl -sSL https://raw.github.com/thbkrkr/dotfiles/master/bootstrap/light \
-        | sh -s a27a61b
+        | sh -s 393799d
 
 COPY dict /usr/share/dict
 COPY rc /root
