@@ -1,9 +1,14 @@
 #!/bin/bash -u
+#
+# Docker entrypoint to setup all the things
+#
 
 sourcenv () {
-  while read envfile; do
-    export $(cat $envfile | grep -v "^#" | xargs)
-  done < <(find /ops/env -name "*.env")
+  if [[ -d /ops/env ]]; then
+    while read envfile; do
+      export $(cat $envfile | grep -v "^#" | xargs)
+    done < <(find /ops/env -name "*.env")
+  fi
 }
 
 source_cluster_env() {

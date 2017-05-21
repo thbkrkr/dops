@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 #
-# Get containers stats using the Docker Remote API
+# Get containers stats using the Docker Remote API.
 #
 set -o pipefail
 

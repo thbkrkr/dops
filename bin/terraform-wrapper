@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 #
-# Terraform wrapper.
+# A Terraform wrapper to use MACHINE_STORAGE_PATH to save the .tfstate.
 #
 
 TF=/usr/local/bin/terraform

@@ -11,40 +11,40 @@ A Docker image with ops tools:
 
 Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 
-#### Which versions?
+```sh
+      _
+   __| | ___  _ __  ___
+  / _` |/ _ \| |_ \/ __|
+ | (°| < (#) < |_) \__ \
+  \__,_|\___/| .__/|___/
+             |_|
 
 ```
+
+#### Which versions?
+
+```sh
 {"bash":"4.3.46"}
 {"curl":"7.52.1"}
 {"jq":"1.5"}
-{"docker":"17.03.0"}
-{"docker-machine":"0.10.0"}
-{"docker-compose":"1.11.2"}
-{"ansible":"2.2.1.0"}
-{"terraform":"0.9.1"}
+{"docker":"17.05.0"}
+{"docker-machine":"0.11.0"}
+{"docker-compose":"1.13.0"}
+{"ansible":"2.3.0.0"}
+{"terraform":"0.9.4"}
 ```
 
 ### Using dops
 
 #### zsh in dops
 
-```
+```sh
 > docker run --rm -ti \
   -v $(pwd):/ops \
-  -e MACHINE_STORAGE_PATH=/ops/clusters \
-  krkr/dops:latest
-  _
-   __| | ___  _ __  ___
-  / _` |/ _ \| |_ \/ __|
- | (°| < (#) < |_) \__ \
-  \__,_|\___/| .__/|___/
-             |_|
- -----------------------
- Welcome in dops!
+  -e CLUSTER=c1.bim \
+  krkr/dops
 
-No docker MACHINE defined. No docker environment set!
-
-/ops  [cluster:machine] [node:n1] root@io
+/ops  [cluster:c1.bim] [node:n1.c1.bim] root@io
 > ...
 ```
 
@@ -52,42 +52,45 @@ No docker MACHINE defined. No docker environment set!
 
 Get your OpenStack creds.
 
-    > cat machine/os-api-creds.env
-    OS_AUTH_URL=https://auth.cloud.ovh.net/v2.0
-    OS_TENANT_ID=?
-    OS_TENANT_NAME=?
-    OS_USERNAME=?
-    OS_PASSWORD=?
-    OS_REGION_NAME=BHS1
+```sh
+> cat machine/env/os-creds.secrets.env
+OS_AUTH_URL=https://auth.cloud.ovh.net/v2.0
+OS_TENANT_ID=?
+OS_TENANT_NAME=?
+OS_USERNAME=?
+OS_PASSWORD=?
+OS_REGION_NAME=BHS1
+```
 
 Create a VM using docker-machine and the [OVH driver](https://github.com/yadutaf/docker-machine-driver-ovh).
 
-    > docker run --rm -ti \
-      -v $(pwd):/ops \
-      --env-file $(pwd)/env/openstack.secrets.env \
-      -e MACHINE_STORAGE_PATH=/ops/clusters \
-      krkr/dops \
-        docker-machine create -d ovh node-1
+```sh
+  > docker run --rm -ti \
+    -v $(pwd):/ops \
+    -e CLUSTER=c1.bim
+    krkr/dops \
+      docker-machine create -d ovh n1.c1.bim
+```
 
 #### Or create your infra with Terraform
 
 Write Terraform config files (example: [create a Swarm cluster](https://github.com/thbkrkr/swarm-up/blob/master/machines/bim/swarm.tf)).
 
-    > docker run --rm -ti \
-      -v $(pwd):/ops \
-      -w machine/bim \
-      krkr/dops \
-        terraform apply
+```sh
+> docker run --rm -ti \
+  krkr/dops \
+    terraform apply
+```
 
-#### Or run Ansible
+#### And/or run Ansible
 
 Write [inventory](https://github.com/thbkrkr/swarm-up/blob/master/ansible/inventory/bim/machines.sh) and [playbooks](https://github.com/thbkrkr/swarm-up/blob/master/ansible%2Fplaybooks%2Fswarm.yml) (example to install docker-machine on nodes managed by Terraform).
 
-    > docker run --rm -ti \
-      -v $(pwd):/ops \
-      -w ansible \
-      krkr/dops \
-        ansible ansible/all.yml -t docker
+```sh
+> docker run --rm -ti \
+  krkr/dops \
+    ansible-playbook ansible/all.yml -t docker
+```
 
 ## License
 

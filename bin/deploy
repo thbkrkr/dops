@@ -4,6 +4,7 @@
 #
 # Usage: deploy <grep> <cmd>
 #
+set -o pipefail
 
 compose_dir=compose
 
