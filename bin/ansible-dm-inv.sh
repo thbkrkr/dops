@@ -2,8 +2,7 @@
 #
 # Ansible dynamic inventory based on $(docker-machine ls).
 #
-
-ANSIBLE_USER=${ANSIBLE_USER:-ubuntu}
+set -o pipefail
 
 main() {
     declare action=${1:-}

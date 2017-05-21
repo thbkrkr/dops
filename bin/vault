@@ -3,10 +3,11 @@
 # Encrypt and decrypt sensitives files using OpenSSL.
 #
 # - Files to encrypt need to be located with a minimum depth of 2.
-# - A password file is required (~/.ovh/secret if VAULT_SECRET_PATH is not defined).
+# - A password file is required (.vault.secret if VAULT_SECRET_PATH is not defined).
 #
 # Usage: vault <path> <filter>
 #
+set -o pipefail
 
 comment()   { sed 's|^|# |g'; }
 uncomment() { sed 's|^# ||g'; }
@@ -60,7 +61,7 @@ progress_bar() {
 
 maybe_encrypt_file() {
     local decryptedFile=$1
-    # Encrypt only if file changed
+    # Encrypt only if the file changed
     declare sha1="notYetEncrypted"
     if [[ -f $decryptedFile.encrypt ]]; then
         decrypt_file $decryptedFile.encrypt $decryptedFile.temp
@@ -85,7 +86,6 @@ encrypt() {
 
         i=$(expr $i + 1)
         [[ $(($i % 50)) -eq 0 ]] && wait || true
-        #progress_bar $i $TOTAL_SECRETS
     done
     wait
 }
@@ -107,7 +107,6 @@ decrypt() {
         maybe_decrypt_file $encryptedFile &
 
         i=$(expr $i + 1)
-        #progress_bar $i $TOTAL_SECRETS
         [[ $(($i % 50)) -eq 0 ]] && wait || true
     done
     wait
@@ -122,13 +121,11 @@ main() {
     if [[ "${VAULT_KEY:-}" != "" ]]; then
         PASSWORD=$VAULT_KEY
     else
-        SECRET=${VAULT_SECRET_PATH:-~/.ovh/secret}
+        SECRET=${VAULT_SECRET_PATH:-.vault.secret}
         [ ! -f $SECRET ] && echo "Error: cannot encrypt without secret public key" && exit 1
 
         PASSWORD=$(cat $SECRET)
     fi
-
-    #TOTAL_SECRETS=$(list_files_to_decrypt "$path" "$filter" | wc -l)
 
     case $cmd in
         encrypt ) encrypt "$path" "$filter" ;;
@@ -136,13 +133,6 @@ main() {
         ls:e*   ) list_files_to_encrypt "$path" "$filter" ;;
         ls:d*   ) list_files_to_decrypt "$path" "$filter" ;;
     esac
-
-    #declare endTime=$(date +%s)
-    #declare duration=$(($endTime - $startTime))
-    #if [[ $duration -gt 1 ]]; then
-        #echo "[OK] $TOTAL_SECRETS secrets decrypted in ${duration}s"
-    #fi
 }
-
 
 main "$@"

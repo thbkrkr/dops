@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 #
-# Ansible dynamic inventory based on a Terraform state.
+# Ansible dynamic inventory based on a terraform.tfstate.
+set -o pipefail
 
 TF_STATE=$MACHINE_STORAGE_PATH/terraform.tfstate
 
