@@ -26,4 +26,4 @@ RUN mkdir /root/.docker && \
     ln -s /ops/.docker/config.json /root/.docker/config.json
 
 WORKDIR /ops
-ENTRYPOINT ["run"]
+ENTRYPOINT ["start"]

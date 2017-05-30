@@ -1,9 +1,20 @@
 #!/bin/bash
 #
-# Set up the cluster specific environment variable MACHINE_STORAGE_PATH.
+# Set up the cluster specific environment variables:
+# CLUSTER and MACHINE_STORAGE_PATH.
 #
 
+_first_cluster() {
+  ls -1 /ops/clusters 2> /dev/null | head -1
+}
+
+
 main() {
+  [[ ! -d /ops/clusters ]] && return 1
+
+  declare CLUSTER=${1:-${CLUSTER:-$(_first_cluster)}}
+  echo export CLUSTER=$CLUSTER
+
   while read envfile; do
     echo export $(cat $envfile | grep -v "^#" | xargs)
   done < <(find /ops/clusters/$CLUSTER -name "*.env")
@@ -11,4 +22,4 @@ main() {
   echo "export MACHINE_STORAGE_PATH=/ops/clusters/$CLUSTER"
 }
 
-main
+main "$@"

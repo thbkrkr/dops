@@ -1,12 +1,7 @@
 #!/bin/bash
 #
-# Set up Ansible, Docker Machine and Docker environment variables from
-# the environment variables CLUSTER and MACHINE.
-#
-# - MACHINE_STORAGE_PATH for Docker Machine depending CLUSTER
-# - Optionally Docker client env vars to call Docker engine API using https
-#  (DOCKER_MACHINE_NAME, DOCKER_HOST, DOCKER_TLS_VERIFY and DOCKER_CERT_PATH)
-#  only if MACHINE is set
+# Set up Docker client environment variables.
+# MACHINE_STORAGE_PATH must be set.
 #
 
 _first_machine() {
@@ -19,12 +14,11 @@ main() {
     return
   fi
 
-  # Try to set up Docker client env if MACHINE or DOCKER_MACHINE_NAME is defined
+  # Get the machine from the first arg or the env var MACHINE or DOCKER_MACHINE_NAME
   # or by getting the first docker machine
-  local machine=${1:-${MACHINE:-${DOCKER_MACHINE_NAME:-$(_first_machine)}}}
+  declare machine=${1:-${MACHINE:-${DOCKER_MACHINE_NAME:-$(_first_machine)}}}
   if [[ "$machine" != "" ]]; then
-
-    # If machine exists (by getting its ip using docker-machine)
+    # Get machine IP using docker-machine
     IP=$(docker-machine ip $machine 2> /dev/null)
     if [[ "$IP" != "" ]]; then
       # Set up the Docker client env vars
@@ -43,7 +37,6 @@ main() {
       echo "export DOCKER_CERT_PATH="
       echo "export DOCKER_MACHINE_NAME="
     fi
-
   fi
 }
 

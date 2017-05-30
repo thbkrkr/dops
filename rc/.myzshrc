@@ -2,9 +2,26 @@
 # Custom ZSH config.
 #
 
+source ~/._docker-machine
+source ~/._autocompletion
+
+# Automatically set all bin/ directories in the PATH
+
+__list_bin_paths() {
+  local _ops_bin_paths=""
+  while read bin_dir; do
+    _ops_bin_paths="$ops_bin_paths:$bin_dir"
+  done < <(find /ops -name bin -type d)
+  echo "$_ops_bin_paths"
+}
+
+export PATH=$PATH:$(__list_bin_paths)
+
 # Aliases
 
 alias tf='terraform-wrapper'
+
+# Functions
 
 dmssh() {
   docker-machine ssh $DOCKER_MACHINE_NAME
@@ -17,20 +34,6 @@ randword() {
 }
 
 denv() { eval $(MACHINE=$1 set_docker_env) }
-
-source ~/._docker-machine
-source ~/._autocompletion
-
-# Automatically set all bin/ directories in the PATH
-list_bin_paths() {
-  local _ops_bin_paths=""
-  while read bin_dir; do
-    _ops_bin_paths="$ops_bin_paths:$bin_dir"
-  done < <(find /ops -name bin -type d)
-  echo "$_ops_bin_paths"
-}
-
-export PATH=$PATH:$(list_bin_paths)
 
 eachmachine() {
   for m in $(docker-machine ls -q); do
@@ -64,10 +67,10 @@ vault:encrypt() {
     vault encrypt . secrets
     [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
   fi
-  if [[ -d "machine" ]]; then
-    vault encrypt "machine" .pem
-    vault encrypt "machine" .id_rsa
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R machine
+  if [[ -d "clusters" ]]; then
+    vault encrypt "clusters" .pem
+    vault encrypt "clusters" .id_rsa
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R clusters
   fi
 }
 

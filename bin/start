@@ -26,8 +26,8 @@ source_docker_env() {
 }
 
 ascii_welcome() {
-  QUIET=${QUIET:-"no"}
-  [[ "$QUIET" == "y" ]] && \
+  W=${W:-"n"}
+  [[ "$W" == "y" ]] && \
   echo '      _
    __| | ___  _ __  ___
   / _` |/ _ \| |_ \/ __|
@@ -41,16 +41,16 @@ ascii_welcome() {
 main() {
   local arg="${@:-"zsh"}"
 
+  # Decrypt all encrypted files
   vault decrypt /ops  encrypt
   vault decrypt /root encrypt
 
+  # Source env vars
   sourcenv
+  source_cluster_env
+  source_docker_env
 
-  if [[ "${CLUSTER:-}" != "" ]]; then
-    source_cluster_env
-    source_docker_env
-  fi
-
+  # Start
   case "$arg" in
     console)
         if [[ ! -z $GOTTY_CREDENTIAL ]]; then
@@ -59,7 +59,8 @@ main() {
             -e "s|x:changemeplease|$GOTTY_CREDENTIAL|" \
               /root/.gotty
         fi
-        exec gotty run zsh
+        export W=y
+        exec gotty start zsh
       ;;
     zsh)
       ascii_welcome

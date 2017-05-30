@@ -122,9 +122,11 @@ main() {
         PASSWORD=$VAULT_KEY
     else
         SECRET=${VAULT_SECRET_PATH:-.vault.secret}
-        [ ! -f $SECRET ] && echo "Error: cannot encrypt without secret public key" && exit 1
+        [ -f $SECRET ] && PASSWORD=$(cat $SECRET)
+    fi
 
-        PASSWORD=$(cat $SECRET)
+    if [[ "${PASSWORD:-}" == "" ]]; then
+        exit
     fi
 
     case $cmd in
