@@ -13,14 +13,14 @@ RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linu
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons && \
+    git clone https://github.com/thbkrkr/ansible-playbooks /ops/ansible && \
+        cd /ops/ansible && git checkout 6fac443 && \
     curl -sSL https://raw.github.com/thbkrkr/dotfiles/master/bootstrap/light \
         | sh -s 393799d
 
 COPY dict /usr/share/dict
 COPY rc /root
 COPY bin /usr/local/bin
-COPY o.tpl /o/tpl
-COPY ansible /ansible
 
 RUN mkdir /root/.docker && \
     ln -s /ops/.docker/config.json /root/.docker/config.json
