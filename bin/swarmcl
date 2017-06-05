@@ -1,0 +1,142 @@
+#!/bin/bash -eu
+#
+# Script to manage Swarm clusters creation.
+#
+# Expect:
+#  - MACHINE_STORAGE_PATH=/ops/clusters/$CLUSTER
+#  - A definition file $MACHINE_STORAGE_PATH/swarm.def:
+#       new_manager m1
+#       manager     m2
+#       manager     m3
+#       worker      w1
+#       worker      w2
+#       worker      w3
+#
+set -o pipefail
+
+help() {
+  echo '
+Usage: swarmcl COMMAND
+
+Manage Swarm clusters.
+
+Options:
+  --help   Print usage
+
+Commands:
+  plan      Generate and show an execution plan
+  apply     Builds or changes infrastructure
+'
+}
+
+get_swarm_info() {
+  docker info --format '{{json .}}' | jq .Swarm
+}
+
+is_swarmized() {
+  case $(get_swarm_info | jq -r .LocalNodeState) in
+    active) return 0 ;;
+    *)      return 1 ;;
+  esac
+}
+
+get_manager_ip() {
+  export MANAGER_IP=$(docker-machine ip $machine)
+}
+
+get_tokens() {
+  if [[ "$MODE" == "apply" ]]; then
+    export MANAGER_TOKEN=$(docker swarm join-token manager -q )
+    export WORKER_TOKEN=$(docker swarm join-token worker -q)
+  else
+    export MANAGER_TOKEN="<?>"
+    export WORKER_TOKEN="<?>"
+  fi
+}
+
+cyan="\e[36m"
+red="\e[31m"
+green="\e[32m"
+purple="\e[35m"
+reset="\e[39m"
+
+set_machine() {
+  declare machine=$1
+  if [[ ! -d /ops/clusters/$CLUSTER/machines/$machine ]]; then
+    echo -e "${red}machine not found${reset} [$purple$machine$reset]"
+    exit 1
+  fi
+  eval $(set_docker_env $machine)
+}
+
+setup_new_manager() {
+  declare machine=$1
+
+  set_machine $machine
+
+  if ! is_swarmized; then
+    echo -e "manager to ${cyan}add${reset}    [$purple$machine$reset]"
+    plan_or_apply docker swarm init
+  else
+    echo -e "manager is ${green}ready${reset}  [$purple$machine$reset]"
+  fi
+
+  get_manager_ip
+  get_tokens
+}
+
+setup_manager() {
+  declare machine=$1
+
+  set_machine $machine
+
+  if ! is_swarmized; then
+    echo -e "manager to ${cyan}add${reset}    [$purple$machine$reset]"
+    plan_or_apply docker swarm join --token $MANAGER_TOKEN $MANAGER_IP:2377
+  else
+    echo -e "manager is ${green}ready${reset}  [$purple$machine$reset]"
+  fi
+}
+
+setup_worker() {
+  declare machine=$1
+
+  set_machine $machine
+
+  if ! is_swarmized; then
+    echo -e "worker  to ${cyan}add${reset}    [$purple$machine$reset]"
+    plan_or_apply docker swarm join --token $WORKER_TOKEN $MANAGER_IP:2377
+  else
+    echo -e "worker  is ${green}ready${reset}  [$purple$machine$reset]"
+  fi
+}
+
+plan_or_apply() {
+  case $MODE in
+    apply) $@ ;;
+  esac
+}
+
+check_swarm_def() {
+  if [[ ! -f $MACHINE_STORAGE_PATH/swarm.def ]]; then
+    echo "Error: $MACHINE_STORAGE_PATH/swarm.def is not defined"
+    exit 1
+  fi
+}
+
+main() {
+  MODE=${1:-help}
+
+  check_swarm_def
+
+  case $MODE in
+    plan|apply) true ;;
+    *) help && exit 2 ;;
+  esac
+
+  while read role_host ; do
+    setup_$role_host.$CLUSTER
+  done < $MACHINE_STORAGE_PATH/swarm.def
+}
+
+main "$@"
