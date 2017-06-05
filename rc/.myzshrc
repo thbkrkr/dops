@@ -11,11 +11,11 @@ __list_bin_paths() {
   local _ops_bin_paths=""
   while read bin_dir; do
     _ops_bin_paths="$ops_bin_paths:$bin_dir"
-  done < <(find /ops -name bin -type d)
+  done < <(find /ops -maxdepth 3 -name bin -type d)
   echo "$_ops_bin_paths"
 }
 
-export PATH=$PATH:$(__list_bin_paths)
+export PATH=$(__list_bin_paths):$PATH
 
 # Aliases
 
