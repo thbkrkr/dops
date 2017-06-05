@@ -90,6 +90,14 @@ ansible-install-python() {
 ###
 # Switch cluster
 
+eachcluster() {
+  for c in $(__list_clusters | grep -v tf-modules);  do
+    >&2 echo "> cluster $c..."
+    cluster $c
+    $@
+  done
+}
+
 cluster() {
   # Update CLUSTER env var
   declare clusterName=${1:-""}
