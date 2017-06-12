@@ -9,7 +9,7 @@ RUN apk --update add \
 # gotty, doo, ons, dotfiles
 RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
         | tar -xz -C /usr/local/bin && \
-    curl -s https://raw.githubusercontent.com/thbkrkr/doo/56f433c54a98e2ce860f880a1251172ad40d6657/doo \
+    curl -s https://raw.githubusercontent.com/thbkrkr/doo/cd65565e4214baa55a76edc081a490035eaba9c2/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
     curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons && \

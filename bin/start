@@ -3,7 +3,7 @@
 # Docker entrypoint to setup all the things
 #
 
-sourcenv () {
+sourcenv() {
   if [[ -d /ops/env ]]; then
     while read envfile; do
       export $(cat $envfile | grep -v "^#" | xargs)
