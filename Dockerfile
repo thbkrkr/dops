@@ -7,11 +7,13 @@ RUN apk --update add \
     openssl bash git zsh zsh-vcs make jq gettext
 
 # gotty, doo, ons, dotfiles
-RUN curl -sL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
+RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
         | tar -xz -C /usr/local/bin && \
-    curl -s https://raw.githubusercontent.com/thbkrkr/doo/b3a90ab3ba1b3375e9a9a2ec20da868473971205/doo \
+    curl -sSL https://raw.githubusercontent.com/thbkrkr/doo/b3a90ab3ba1b3375e9a9a2ec20da868473971205/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
-    curl -skL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
+    curl -sSL https://github.com/thbkrkr/qli/releases/download/0.2.3/oq \
+        > /usr/local/bin/oq && chmod +x /usr/local/bin/oq && \
+    curl -sSL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons && \
     git clone https://github.com/thbkrkr/ansible-playbooks /ansible && \
         cd /ansible && git checkout 6fac443 && \
