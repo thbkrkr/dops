@@ -24,14 +24,14 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 #### Which versions?
 
 ```sh
-{"bash":"4.3.46"}
-{"curl":"7.52.1"}
+{"bash":"4.3.48"}
+{"curl":"7.55.0"}
 {"jq":"1.5"}
-{"docker":"17.05.0"}
-{"docker-machine":"0.11.0"}
-{"docker-compose":"1.13.0"}
-{"ansible":"2.3.0.0"}
-{"terraform":"0.9.4"}
+{"docker":"17.07.0"}
+{"docker-machine":"0.12.2"}
+{"docker-compose":"1.16.1"}
+{"ansible":"2.3.2.0"}
+{"terraform":"0.10.3"}
 ```
 
 ### Using dops
