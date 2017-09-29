@@ -7,18 +7,17 @@ TF=/usr/local/bin/terraform
 
 pushd $MACHINE_STORAGE_PATH > /dev/null
 
+stateFile=$MACHINE_STORAGE_PATH/terraform.tfstate
+
 case $1 in
-  plan)
-    $TF plan -state $MACHINE_STORAGE_PATH/terraform.tfstate $MACHINE_STORAGE_PATH
-    ;;
   show)
     $TF show $MACHINE_STORAGE_PATH/terraform.tfstate
     ;;
-  apply)
-    $TF apply -state $MACHINE_STORAGE_PATH/terraform.tfstate $MACHINE_STORAGE_PATH
+  plan|apply|destroy)
+    $TF $1 -state $stateFile $MACHINE_STORAGE_PATH
     ;;
-  destroy)
-    $TF destroy -state $MACHINE_STORAGE_PATH/terraform.tfstate $MACHINE_STORAGE_PATH
+  *)
+    $TF init
     ;;
 esac
 
