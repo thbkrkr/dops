@@ -6,7 +6,7 @@ FROM krkr/dops-base
 RUN apk --update add \
     openssl bash git zsh zsh-vcs make jq gettext
 
-# gotty, doo, ons, dotfiles
+# gotty, doo, oq, ons, dotfiles, docker-machine-certs
 RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
         | tar -xz -C /usr/local/bin && \
     curl -sSL https://raw.githubusercontent.com/thbkrkr/doo/b3a90ab3ba1b3375e9a9a2ec20da868473971205/doo \
@@ -18,7 +18,9 @@ RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_lin
     git clone https://github.com/thbkrkr/ansible-playbooks /ansible && \
         cd /ansible && git checkout 6fac443 && \
     curl -sSL https://raw.github.com/thbkrkr/dotfiles/master/bootstrap/light \
-        | sh -s 393799d
+        | sh -s 393799d && \
+    curl -sSL https://github.com/sebgl/docker-machine-certs/releases/download/0.1/docker-machine-certs \
+        > /usr/local/bin/docker-machine-certs && chmod +x /usr/local/bin/docker-machine-certs
 
 COPY dict /usr/share/dict
 COPY rc /root
