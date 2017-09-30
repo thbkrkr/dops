@@ -1,21 +1,30 @@
 # Autocomplete aliases functions
 
-# dme/denv aliases with docker machines
+# 'node' aliases with docker machines
 
-__list_machines() {
+__list_nodes() {
   docker-machine ls -q
 }
 
-_list_machines() {
-  while read m
-  do
+__autocomplete_node() {
+  while read m; do
     compadd "$m"
-  done < <(__list_machines)
+  done < <(__list_nodes)
   return 0
 }
 
-compdef _list_machines denv
-compdef _list_machines dme
+compdef __autocomplete_node node
+
+# 'cluster' aliases with docker machines
+
+__autocomplete_clusters() {
+  while read m; do
+    compadd "$m"
+  done < <(__list_clusters)
+  return 0
+}
+
+compdef __autocomplete_clusters cluster
 
 # ansible playbooks
 
@@ -23,12 +32,11 @@ __list_playbooks() {
   find /ops/ansible -name "*.yml" | sed -e "s|/ops/ansible/||g" -e "s|.yml||g"
 }
 
-_list_playbooks() {
-  while read m
-  do
+__autocomplete_playbooks() {
+  while read m; do
     compadd "$m"
   done < <(__list_playbooks)
   return 0
 }
 
-compdef _list_playbooks play
+compdef __autocomplete_playbooks play

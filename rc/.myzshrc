@@ -5,6 +5,42 @@
 source ~/._docker-machine
 source ~/._autocompletion
 
+help() {
+  echo '
+      _
+   __| | ___  _ __  ___
+  / _` |/ _ \| |_ \/ __|
+ | (°| < (#) < |_) \__ \
+  \__,_|\___/| .__/|___/
+             |_|
+ -----------------------
+
+Commands:
+  cluster         Select a cluster
+  node            Select a node
+  dmssh           SSH a <node>
+  dmlog           Stream <node> syslog (using docker-machine ssh tail -f syslog)
+  vault:encrypt   Encrypt secrets
+  vault:decrypt   Decrypt secrets
+  rcmd            Execute a remote command (using ansible)
+  rcmds           Execute a remote command on all machines (using ansible)
+  eachmachine     Execute a local command by setting each docker-engine machine
+  eachcluster     Execute a local command in all clusters
+  eachmachine
+  eachcluster
+  ansible-install-python
+  sshkeygen       Generate SSH key
+  randword        Generate random name
+
+Aliases:
+  a     ansible
+  ap    ansible-playbook
+  d     docker
+  dm    docker-machine
+  dc    docker-compose
+  tf    terraform'
+}
+
 # Automatically set all bin/ directories in the PATH
 
 __list_bin_paths() {
@@ -20,75 +56,17 @@ export PATH=$(__list_bin_paths):$PATH
 # Aliases
 
 alias tf='terraform-wrapper'
-
-# Functions
-
-dmssh() {
-  docker-machine ssh $DOCKER_MACHINE_NAME
-}
-
-randword() {
-  local name=$(shuf -n 1 /usr/share/dict/names)
-  local qualifier=$(shuf -n 1 /usr/share/dict/qualifiers)
-  echo "$name-$qualifier"
-}
-
-denv() { eval $(MACHINE=$1 set_docker_env) }
-
-eachmachine() {
-  for m in $(docker-machine ls -q); do
-    >&2 echo "> machine $m..."
-    dme $m
-    $@
-  done
-}
-
-rcmd () {
-  declare cmd_args="$@"
-  docker-machine ssh $DOCKER_MACHINE_NAME $cmd_args
-}
-
-rcmds () {
-  declare cmd_args="$@"
-  ansible all -sa 'sh -c "'$cmd_args'"'
-}
-
-dmlog () {
-  docker-machine ssh $DOCKER_MACHINE_NAME sudo tail -f /var/log/syslog | grep "${1:- }"
-}
-
-play() {
-  declare name=$1 && shift
-  ansible-playbook /ops/ansible/$name.yml $@
-}
-
-vault:encrypt() {
-  if [[ -d "env" ]]; then
-    vault encrypt . secrets
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
-  fi
-  if [[ -d "clusters" ]]; then
-    vault encrypt "clusters" .pem
-    vault encrypt "clusters" .id_rsa
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R clusters
-  fi
-}
-
-vault:decrypt() {
-  vault decrypt . encrypt
-}
-
-sshkeygen() {
-  declare name=$1
-  ssh-keygen -t rsa -b 4096 -i -f $(pwd)/$name
-}
-
-ansible-install-python() {
-  ansible all -m raw -sa "apt-get update && apt-get -y install python"
-}
+alias cl='cluster'
+alias n='node'
+alias dme='node'
+alias denv='node'
 
 ###
-# Switch cluster
+# Functions
+
+__list_clusters() {
+  ls -1 /ops/clusters | grep -v "^ssh$"
+}
 
 eachcluster() {
   for c in $(__list_clusters | grep -v tf-modules);  do
@@ -119,18 +97,74 @@ cluster() {
   eval $(set_docker_env)
 }
 
-__list_clusters() {
-  ls -1 /ops/clusters | grep -v "^ssh$"
+node() {
+  eval $(MACHINE=$1 set_docker_env)
 }
 
-__autocomplete_clusters() {
-  while read m
-  do
-    compadd "$m"
-  done < <(__list_clusters)
-  return 0
+dmssh() {
+  docker-machine ssh $DOCKER_MACHINE_NAME
 }
 
-compdef __autocomplete_clusters cluster
+eachmachine() {
+  for m in $(docker-machine ls -q); do
+    >&2 echo "> machine $m..."
+    dme $m
+    $@
+  done
+}
 
-alias cl='cluster'
+rcmd () {
+  declare cmd_args="$@"
+  docker-machine ssh $DOCKER_MACHINE_NAME $cmd_args
+}
+
+rcmds () {
+  declare cmd_args="$@"
+  ansible all -sa 'sh -c "'$cmd_args'"'
+}
+
+dmlog () {
+  docker-machine ssh $DOCKER_MACHINE_NAME sudo tail -f /var/log/syslog | grep "${1:- }"
+}
+
+# Vault
+
+vault:encrypt() {
+  if [[ -d "env" ]]; then
+    vault encrypt . secrets
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R "env"
+  fi
+  if [[ -d "clusters" ]]; then
+    vault encrypt "clusters" .pem
+    vault encrypt "clusters" .id_rsa
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID -R clusters
+  fi
+}
+
+vault:decrypt() {
+  vault decrypt . encrypt
+}
+
+# Ansible
+
+play() {
+  declare name=$1 && shift
+  ansible-playbook /ops/ansible/$name.yml $@
+}
+
+ansible-install-python() {
+  ansible all -m raw -sa "apt-get update && apt-get -y install python"
+}
+
+# Utils
+
+sshkeygen() {
+  declare name=$1
+  ssh-keygen -t rsa -b 4096 -i -f $(pwd)/$name
+}
+
+randword() {
+  local name=$(shuf -n 1 /usr/share/dict/names)
+  local qualifier=$(shuf -n 1 /usr/share/dict/qualifiers)
+  echo "$name-$qualifier"
+}
