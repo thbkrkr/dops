@@ -168,3 +168,7 @@ randword() {
   local qualifier=$(shuf -n 1 /usr/share/dict/qualifiers)
   echo "$name-$qualifier"
 }
+
+# Source additional user files that may exist in ~/.dopsinit
+[[ -d ~/.dopsinit ]] && \
+  for f in ~/.dopsinit/*; do source $f; done
