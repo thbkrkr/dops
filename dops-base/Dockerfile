@@ -4,7 +4,7 @@
 FROM krkr/docker-toolbox
 
 # Install Ansible
-ENV ANSIBLE_VERSION=2.4.0.0 \
+ENV ANSIBLE_VERSION=2.4.1.0 \
     ANSIBLE_HOST_KEY_CHECKING=False
 RUN apk --update add build-base python-dev libffi-dev \
     openssl-dev py2-pip py-crypto py-yaml py-jinja2 openssh-client && \
@@ -12,7 +12,7 @@ RUN apk --update add build-base python-dev libffi-dev \
     apk del build-base python-dev openssl-dev libffi-dev
 
 # Install Terraform
-ENV TERRAFORM_VERSION 0.10.5
+ENV TERRAFORM_VERSION 0.10.8
 RUN apk --update add ca-certificates && \
     curl -sSkL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" > /terraform.zip && \
     unzip /terraform.zip && rm /terraform.zip && \
