@@ -9,7 +9,7 @@ RUN apk --update add \
 # gotty, doo, oq, ons, dotfiles, docker-machine-certs
 RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
         | tar -xz -C /usr/local/bin && \
-    curl -sSL https://raw.githubusercontent.com/thbkrkr/doo/b3a90ab3ba1b3375e9a9a2ec20da868473971205/doo \
+    curl -sSL https://raw.githubusercontent.com/thbkrkr/doo/7911779151a06d1e7172f0f18effe2ca2435d32a/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
     curl -sSL https://github.com/thbkrkr/qli/releases/download/0.2.3/oq \
         > /usr/local/bin/oq && chmod +x /usr/local/bin/oq && \
