@@ -16,7 +16,7 @@ RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_lin
     curl -sSL https://github.com/thbkrkr/ons/releases/download/1.3/ons \
         > /usr/local/bin/ons && chmod +x /usr/local/bin/ons && \
     git clone https://github.com/thbkrkr/ansible-playbooks /ansible && \
-        cd /ansible && git checkout 7865c23 && \
+        cd /ansible && git checkout c666de2 && \
     curl -sSL https://raw.github.com/thbkrkr/dotfiles/master/bootstrap/light \
         | sh -s 15e4200 && \
     curl -sSL https://github.com/sebgl/docker-machine-certs/releases/download/0.1/docker-machine-certs \
