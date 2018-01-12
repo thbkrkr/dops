@@ -27,11 +27,11 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 {"bash":"4.3.48"}
 {"curl":"7.55.0"}
 {"jq":"1.5"}
-{"docker":"17.07.0"}
-{"docker-machine":"0.12.2"}
-{"docker-compose":"1.16.1"}
-{"ansible":"2.3.2.0"}
-{"terraform":"0.10.3"}
+{"docker":"18.01.0"}
+{"docker-machine":"0.13.0"}
+{"docker-compose":"1.18.0"}
+{"ansible":"2.4.2.0"}
+{"terraform":"0.11.2"}
 ```
 
 ### Using dops
