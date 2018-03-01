@@ -16,7 +16,7 @@ encrypt_file() {
     local decryptedFile=$1
     local encryptedFile=$decryptedFile.encrypt
 
-    cat $decryptedFile | openssl aes-256-cbc -salt -a -k $PASSWORD | comment > $encryptedFile
+    cat $decryptedFile | openssl aes-256-cbc -salt -a -k $PASSWORD -md md5 | comment > $encryptedFile
     [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $encryptedFile || true
 }
 
@@ -24,7 +24,7 @@ decrypt_file() {
     local encryptedFile=$1
     local decryptedFile=$2
 
-    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD > $decryptedFile
+    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD -md md5 > $decryptedFile
     [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $decryptedFile || true
 }
 
