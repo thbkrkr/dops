@@ -24,3 +24,4 @@ versions:
 	@docker run --rm -e VAULT_KEY=x $(NAME):latest whichversion docker-compose
 	@docker run --rm -e VAULT_KEY=x $(NAME):latest whichversion ansible
 	@docker run --rm -e VAULT_KEY=x $(NAME):latest whichversion terraform
+	@docker run --rm -e VAULT_KEY=x $(NAME):latest whichversion packer
