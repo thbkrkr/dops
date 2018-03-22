@@ -14,10 +14,10 @@ case $1 in
     $TF show $MACHINE_STORAGE_PATH/terraform.tfstate
     ;;
   plan|apply|destroy)
-    $TF $1 -state $stateFile $MACHINE_STORAGE_PATH
+    $TF $@ -state $stateFile $MACHINE_STORAGE_PATH
     ;;
   *)
-    $TF init
+    $TF $@
     ;;
 esac
 
