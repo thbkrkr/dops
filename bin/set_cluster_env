@@ -8,7 +8,6 @@ _first_cluster() {
   ls -1 /ops/clusters 2> /dev/null | head -1
 }
 
-
 main() {
   [[ ! -d /ops/clusters ]] && return 1
 
@@ -20,6 +19,7 @@ main() {
   done < <(find /ops/clusters/$CLUSTER -name "*.env")
 
   echo "export MACHINE_STORAGE_PATH=/ops/clusters/$CLUSTER"
+  echo "export KUBECONFIG=/ops/clusters/$CLUSTER/config/kubectl.secrets.conf"
 }
 
 main "$@"

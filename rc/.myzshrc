@@ -3,6 +3,7 @@
 #
 
 source ~/._docker-machine
+source ~/._kubectl
 source ~/._autocompletion
 
 help() {
@@ -120,7 +121,7 @@ rcmd () {
 
 rcmds () {
   declare cmd_args="$@"
-  ansible all -sa 'sh -c "'$cmd_args'"'
+  ansible all -m raw -ba "$cmd_args"
 }
 
 dmlog () {
