@@ -3,7 +3,6 @@
 ##}
 FROM krkr/docker-toolbox
 
-# Install Ansible
 ENV ANSIBLE_VERSION=2.4.3.0 \
     ANSIBLE_HOST_KEY_CHECKING=False
 RUN apk --update add build-base libffi-dev \
@@ -12,7 +11,6 @@ RUN apk --update add build-base libffi-dev \
     pip install ansible==${ANSIBLE_VERSION} && \
     apk del build-base openssl-dev libffi-dev python-dev
 
-# Install Terraform
 ENV TERRAFORM_VERSION 0.11.4
 RUN apk --update add ca-certificates && \
     curl -sSkL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" > /terraform.zip && \
@@ -20,9 +18,11 @@ RUN apk --update add ca-certificates && \
     mv terraform* /usr/local/bin && \
     chmod +x /usr/local/bin/terraform*
 
-# Install Packer
 ENV PACKER_VERSION 1.2.1
 RUN wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip" && \
     unzip packer_${PACKER_VERSION}_linux_amd64.zip && \
     rm packer_${PACKER_VERSION}_linux_amd64.zip && \
     mv packer /usr/local/bin
+
+RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v1.9.6/bin/linux/amd64/kubectl \
+    > /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
