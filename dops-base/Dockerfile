@@ -11,7 +11,7 @@ RUN apk --update add build-base libffi-dev \
     pip install ansible==${ANSIBLE_VERSION} && \
     apk del build-base openssl-dev libffi-dev python-dev
 
-ENV TERRAFORM_VERSION 0.11.4
+ENV TERRAFORM_VERSION 0.11.5
 RUN apk --update add ca-certificates && \
     curl -sSkL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" > /terraform.zip && \
     unzip /terraform.zip && rm /terraform.zip && \
