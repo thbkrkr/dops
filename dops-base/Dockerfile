@@ -34,3 +34,9 @@ RUN wget -q "https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION
     rm helm-v${HELM_VERSION}-linux-amd64.tar.gz && \
     mv linux-amd64/helm /usr/local/bin && \
     rm -rf linux-amd64
+
+RUN apk --no-cache add \
+  python-dev py-pip py-setuptools \
+  ca-certificates gcc musl-dev linux-headers \
+  && pip install --upgrade --no-cache-dir pip setuptools python-openstackclient \
+  && apk del gcc musl-dev linux-headers
