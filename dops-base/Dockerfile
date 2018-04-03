@@ -24,5 +24,13 @@ RUN wget -q "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PA
     rm packer_${PACKER_VERSION}_linux_amd64.zip && \
     mv packer /usr/local/bin
 
-RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v1.9.6/bin/linux/amd64/kubectl \
+ENV KUBECTL_VERSION 1.9.6
+RUN curl -sSL https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
     > /usr/local/bin/kubectl && chmod +x /usr/local/bin/kubectl
+
+ENV HELM_VERSION 2.8.2
+RUN wget -q "https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz" && \
+    tar xvzf helm-v${HELM_VERSION}-linux-amd64.tar.gz && \
+    rm helm-v${HELM_VERSION}-linux-amd64.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin && \
+    rm -rf linux-amd64
