@@ -56,7 +56,7 @@ export PATH=$(__list_bin_paths):$PATH
 
 # Aliases
 
-alias tf='terraform-wrapper'
+alias tfw='terraform-wrapper'
 alias cl='cluster'
 alias n='node'
 alias dme='node'
