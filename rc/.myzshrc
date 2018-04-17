@@ -160,8 +160,8 @@ ansible-install-python() {
 # Utils
 
 sshkeygen() {
-  declare name=${1:-admin}
-  ssh-keygen -t rsa -b 4096 -i -f $name
+  declare name=${1:-admin.id_rsa}
+  ssh-keygen -t rsa -b 4096 -P "" -f $name
 }
 
 randword() {
