@@ -24,8 +24,15 @@ decrypt_file() {
     local encryptedFile=$1
     local decryptedFile=$2
 
-    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD -md md5 > $decryptedFile
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $decryptedFile || true
+    set +e
+    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD -md md5 &> $decryptedFile
+    status=$?
+    set -e
+    if [[ $status -ne 0 ]]; then
+        mv $decryptedFile $decryptedFile.error
+        decryptedFile=$decryptedFile.error
+    fi
+    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $decryptedFile && chmod 600 $decryptedFile || true
 }
 
 list_files_to_encrypt() {
@@ -95,7 +102,6 @@ maybe_decrypt_file() {
 
     declare decryptedFile=${encryptedFile%.*}
     decrypt_file $encryptedFile $decryptedFile
-    chmod 600 $decryptedFile
 }
 
 decrypt() {
