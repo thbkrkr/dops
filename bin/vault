@@ -53,19 +53,6 @@ list_files_to_decrypt() {
         -name "*$filter*" -type f
 }
 
-progress_bar() {
-    declare i=$1
-    declare total=$2
-    [[ $total -eq 0 ]] && total=10000000 || true
-
-    local progress=$(($i*100/$total))
-    local _done=$((${progress}*4/10))
-    local left=$((40-$_done))
-    fill=$(printf "%${_done}s")
-    empty=$(printf "%${left}s")
-    printf "\r[${fill// /#}${empty// /-}] ${progress}%%"
-}
-
 maybe_encrypt_file() {
     local decryptedFile=$1
     # Encrypt only if the file changed
