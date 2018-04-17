@@ -3,7 +3,7 @@
 ##}
 FROM krkr/docker-toolbox
 
-ENV ANSIBLE_VERSION=2.4.3.0 \
+ENV ANSIBLE_VERSION=2.5.0.0 \
     ANSIBLE_HOST_KEY_CHECKING=False
 RUN apk --update add build-base libffi-dev \
     openssl-dev openssh-client \
