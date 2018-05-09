@@ -32,9 +32,12 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 {"docker":"18.01.0"}
 {"docker-machine":"0.13.0"}
 {"docker-compose":"1.18.0"}
-{"ansible":"2.4.3.0"}
-{"terraform":"0.11.4"}
-{"kubectl":"1.9.6"}
+{"ansible":"2.5.2.0"}
+{"terraform":"0.11.7"}
+{"packer":"1.2.3"}
+{"kubectl":"1.10.2"}
+{"helm":"2.9.0"}
+{"openstackclient":"3.8.2"}
 ```
 
 ### Using dops
