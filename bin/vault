@@ -9,6 +9,8 @@
 #
 set -o pipefail
 
+USERID=${USERID:-$(id -u)}
+
 comment()   { sed 's|^|# |g'; }
 uncomment() { sed 's|^# ||g'; }
 
@@ -17,7 +19,7 @@ encrypt_file() {
     local encryptedFile=$decryptedFile.encrypt
 
     cat $decryptedFile | openssl aes-256-cbc -salt -a -k $PASSWORD -md md5 | comment > $encryptedFile
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $encryptedFile || true
+    chown $USERID:$USERID $encryptedFile || true
 }
 
 decrypt_file() {
@@ -32,7 +34,7 @@ decrypt_file() {
         mv $decryptedFile $decryptedFile.error
         decryptedFile=$decryptedFile.error
     fi
-    [[ ${USERID:-} != "" ]] && chown $USERID:$USERID $decryptedFile && chmod 600 $decryptedFile || true
+    chown $USERID:$USERID $decryptedFile && chmod 600 $decryptedFile || true
 }
 
 list_files_to_encrypt() {
