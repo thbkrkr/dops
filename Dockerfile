@@ -4,7 +4,7 @@
 FROM krkr/dops-base
 
 RUN apk --update add \
-    tmux openssl bash git zsh zsh-vcs make jq gettext
+    tmux openssl bash git zsh zsh-vcs make jq gettext vim
 
 # gotty, doo, oq, ons, dotfiles, docker-machine-certs
 RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
