@@ -38,5 +38,5 @@ RUN wget -q "https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION
 RUN apk --no-cache add \
       python-dev py-pip py-setuptools \
       ca-certificates gcc musl-dev linux-headers \
-  && pip install --upgrade --no-cache-dir pip setuptools python-openstackclient==3.8.2 \
+  && pip install --upgrade --no-cache-dir pip setuptools python-openstackclient==3.15.0 \
   && apk del gcc musl-dev linux-headers

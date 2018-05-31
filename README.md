@@ -37,7 +37,7 @@ Based on [krkr/docker-toolbox](https://github.com/thbkrkr/docker-toolbox).
 {"packer":"1.2.3"}
 {"kubectl":"1.10.2"}
 {"helm":"2.9.0"}
-{"openstackclient":"3.8.2"}
+{"openstackclient":"3.15.0"}
 ```
 
 ### Using dops
