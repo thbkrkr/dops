@@ -17,6 +17,7 @@ comment()   { sed 's|^|# |g'; }
 uncomment() { sed 's|^# ||g'; }
 
 encrypt_file() {
+    set_password
     local decryptedFile=$1
     local encryptedFile=$decryptedFile.encrypt
 
@@ -25,6 +26,7 @@ encrypt_file() {
 }
 
 decrypt_file() {
+    set_password
     local encryptedFile=$1
     local decryptedFile=$2
     local tempDecryptedFile=$decryptedFile
@@ -124,11 +126,11 @@ decrypt() {
     wait
 }
 
-main() {
-    declare cmd=$1
-    declare path=${2:-"."}
-    declare filter=${3:-"*"}
-    declare startTime=$(date +%s)
+set_password() {
+    if [[ ! -z "${PASSWORD:-}" ]]; then
+        #Password already set
+        return
+    fi
 
     if [[ "${VAULT_KEY:-}" != "" ]]; then
         PASSWORD=$VAULT_KEY
@@ -138,8 +140,16 @@ main() {
     fi
 
     if [[ "${PASSWORD:-}" == "" ]]; then
+        (>&2 printf "${RED}No VAULT_KEY found\n$NC")
         exit
     fi
+}
+
+main() {
+    declare cmd=$1
+    declare path=${2:-"."}
+    declare filter=${3:-"*"}
+    declare startTime=$(date +%s)
 
     case $cmd in
         encrypt ) encrypt "$path" "$filter" ;;
