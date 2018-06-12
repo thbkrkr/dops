@@ -10,11 +10,14 @@
 set -o pipefail
 
 USERID=${USERID:-$(id -u)}
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
 comment()   { sed 's|^|# |g'; }
 uncomment() { sed 's|^# ||g'; }
 
 encrypt_file() {
+    set_password
     local decryptedFile=$1
     local encryptedFile=$decryptedFile.encrypt
 
@@ -23,16 +26,32 @@ encrypt_file() {
 }
 
 decrypt_file() {
+    set_password
     local encryptedFile=$1
     local decryptedFile=$2
+    local tempDecryptedFile=$decryptedFile
+
+    if [ -f $decryptedFile ]; then
+        tempDecryptedFile="$decryptedFile.$(date +%s).decrypted"
+    fi
 
     set +e
-    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD -md md5 &> $decryptedFile
+    cat $encryptedFile | uncomment | openssl aes-256-cbc -d -a -k $PASSWORD -md md5 &> $tempDecryptedFile
     status=$?
     set -e
     if [[ $status -ne 0 ]]; then
-        mv $decryptedFile $decryptedFile.error
-        decryptedFile=$decryptedFile.error
+        mv $tempDecryptedFile $tempDecryptedFile.error
+        decryptedFile=$tempDecryptedFile.error
+        (>&2 printf "${RED}Could not decrypt $encryptedFile, partial decryption in $tempDecryptedFile.error\n$NC")
+    else
+        if cmp -s $tempDecryptedFile $decryptedFile; then
+           if [[ "$tempDecryptedFile" != "$decryptedFile" ]]; then
+               rm $tempDecryptedFile
+           fi
+        else
+            (>&2 printf "${RED}Decrypting $encryptedFile would override $decryptedFile content.${NC}\nDecrypting to $tempDecryptedFile instead\n")
+            decryptedFile=$tempDecryptedFile
+        fi
     fi
     chown $USERID:$USERID $decryptedFile && chmod 600 $decryptedFile || true
 }
@@ -107,11 +126,11 @@ decrypt() {
     wait
 }
 
-main() {
-    declare cmd=$1
-    declare path=${2:-"."}
-    declare filter=${3:-"*"}
-    declare startTime=$(date +%s)
+set_password() {
+    if [[ ! -z "${PASSWORD:-}" ]]; then
+        #Password already set
+        return
+    fi
 
     if [[ "${VAULT_KEY:-}" != "" ]]; then
         PASSWORD=$VAULT_KEY
@@ -121,8 +140,16 @@ main() {
     fi
 
     if [[ "${PASSWORD:-}" == "" ]]; then
+        (>&2 printf "${RED}No VAULT_KEY found\n$NC")
         exit
     fi
+}
+
+main() {
+    declare cmd=$1
+    declare path=${2:-"."}
+    declare filter=${3:-"*"}
+    declare startTime=$(date +%s)
 
     case $cmd in
         encrypt ) encrypt "$path" "$filter" ;;
