@@ -57,6 +57,7 @@ list_files_to_decrypt() {
 
 maybe_encrypt_file() {
     local decryptedFile=$1
+    local keepSourceFile=$2
     # Encrypt only if the file changed
     declare sha1="notYetEncrypted"
     if [[ -f $decryptedFile.encrypt ]]; then
@@ -69,16 +70,21 @@ maybe_encrypt_file() {
         echo "Encrypt $decryptedFile..."
         encrypt_file $decryptedFile
     fi
-    rm -f $decryptedFile.temp $decryptedFile
+
+    rm -f $decryptedFile.temp
+    if [[ "$keepSourceFile" == "false" ]]; then
+        rm -f $decryptedFile
+    fi
 }
 
 encrypt() {
     declare path=$1
     declare filter=$2
+    declare keepSourceFile=${3:-false}
     local i=1
     for decryptedFile in $(list_files_to_encrypt "$path" "$filter")
     do
-        maybe_encrypt_file $decryptedFile &
+        maybe_encrypt_file $decryptedFile $keepSourceFile &
 
         i=$(expr $i + 1)
         [[ $(($i % 50)) -eq 0 ]] && wait || true
@@ -125,7 +131,8 @@ main() {
     fi
 
     case $cmd in
-        encrypt ) encrypt "$path" "$filter" ;;
+        encrypt ) encrypt "$path" "$filter";;
+        encrypt-but-keep-src-file ) encrypt "$path" "$filter" "true";;
         decrypt ) decrypt "$path" "$filter" ;;
         ls:e*   ) list_files_to_encrypt "$path" "$filter" ;;
         ls:d*   ) list_files_to_decrypt "$path" "$filter" ;;
