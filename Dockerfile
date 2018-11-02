@@ -7,7 +7,7 @@ RUN apk --update add \
     tmux openssl bash git zsh zsh-vcs make jq gettext vim
 
 # gotty, doo, oq, ons, dotfiles, docker-machine-certs
-RUN curl -sSL https://github.com/yudai/gotty/releases/download/v0.0.13/gotty_linux_amd64.tar.gz \
+RUN curl -sSL https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz \
         | tar -xz -C /usr/local/bin && \
     curl -sSL https://raw.githubusercontent.com/thbkrkr/doo/7911779151a06d1e7172f0f18effe2ca2435d32a/doo \
         > /usr/local/bin/doo && chmod +x /usr/local/bin/doo && \
